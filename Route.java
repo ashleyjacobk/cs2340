@@ -41,8 +41,13 @@ public class Route {
 
     public void display_vehicles() {
         for (int i = 0; i < vehicles.size(); i++) {
-            System.out.print(vehicles.get(i).getName() + " ");
+            Vehicle vehicle = vehicles.get(i);
+            System.out.print(vehicle.getType() + ": " + vehicle.getId() + " ");
         }
         System.out.println();
+    }
+
+    public List<Location> getLocations() {
+        return locations;
     }
 }

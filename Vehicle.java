@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Creates a class for a vehicle which runs through locations on a specific route
@@ -38,9 +39,50 @@ public class Vehicle {
         totalVehicles.add(this);
     }
 
-    private void Location getNextLocation() {
-        for(int i = 0; i < this.route.getLocations().length; i++) {
-            if this.
+    private Location getNextLocation() {
+        if (route == null || currentLocation == null) {
+            return null;
         }
+        
+        List<Location> routeLocations = route.getLocations();
+        int currentIndex = routeLocations.indexOf(currentLocation);
+        
+        if (currentIndex == -1) {
+            return null;
+        }
+        
+        // Find the destination location
+        Location destination = null;
+        for (Location loc : routeLocations) {
+            if (loc.getName().equals(direction)) {
+                destination = loc;
+                break;
+            }
+        }
+        
+        if (destination == null) {
+            return null;
+        }
+        
+        int destIndex = routeLocations.indexOf(destination);
+        if (currentIndex < destIndex) {
+            return routeLocations.get(currentIndex + 1);
+        } else if (currentIndex > destIndex) {
+            return routeLocations.get(currentIndex - 1);
+        }
+        
+        return null;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getDirection() {
+        return direction;
     }
 }
