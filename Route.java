@@ -12,7 +12,7 @@ public class Route {
         vehicles = new ArrayList<Vehicle>();
     }
 
-    public void add_location(Location newLoc, int position) {
+    public void addLocation(Location newLoc, int position) {
         if (position < locations.size() && position >= 0) {
             locations.add(position, newLoc);
         } else {
@@ -24,7 +24,7 @@ public class Route {
         vehicles.add(newVehicle);
     }
 
-    public void remove_position(int position) {
+    public void removeLocation(int position) {
         if (position < locations.size() && position >= 0) {
             locations.remove(position);
         } else {
@@ -49,5 +49,9 @@ public class Route {
 
     public List<Location> getLocations() {
         return locations;
+    }
+
+    public List<Vehicle> getVehicles() {
+        return vehicles;
     }
 }

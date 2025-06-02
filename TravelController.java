@@ -30,7 +30,7 @@ public class TravelController {
 
                 switch (tokens[0]) {
                     case "create_vehicle":
-                        createVehicle(tokens[1], tokens[2], Integer.parseInt(tokens[4]));
+                        createVehicle(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4]));
                         break;
                     case "display_vehicles":
                         displayVehicles();
@@ -75,8 +75,8 @@ public class TravelController {
         }
     }
 
-    private void createVehicle(int capacity, String type, String id, String direction, Route route, Location currentLocation) {
-        vehicles.put(id, new Vehicle(capacity, type, id, direction, route, currentLocation));
+    private void createVehicle(String id, String type, String licensePlate, int capacity) {
+        vehicles.put(id, new Vehicle(capacity, type, id, licensePlate, null, null));
         displayMessage("info", "Vehicle created: " + id);
     }
 
@@ -165,11 +165,13 @@ public class TravelController {
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");
         }
-        List<Vehicle> vehiclesOnRoute = route.getAssignedVehicles();
+        List<Vehicle> vehiclesOnRoute = route.getVehicles();
         if (vehiclesOnRoute.isEmpty()) {
             displayMessage("info", "No vehicles assigned to route " + routeId);
         } else {
-            vehiclesOnRoute.forEach(System.out::println);
+            for (Vehicle vehicle : vehiclesOnRoute) {
+                System.out.println(vehicle);
+            }
         }
     }
 

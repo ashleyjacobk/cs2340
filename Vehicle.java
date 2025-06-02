@@ -85,4 +85,18 @@ public class Vehicle {
     public String getDirection() {
         return direction;
     }
+
+    public void setCurrentRoute(Route route) {
+        this.route = route;
+    }
+
+    public void setCurrentPosition(int position) {
+        if (route != null && position >= 0 && position < route.getLocations().size()) {
+            this.currentLocation = route.getLocations().get(position);
+        }
+    }
+
+    public Location getCurrentLocation() {
+        return currentLocation;
+    }
 }
