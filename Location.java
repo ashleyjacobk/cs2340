@@ -55,4 +55,11 @@ public class Location {
     public boolean setStatus() {
         return status;
     }
+
+    /* METHODS */
+    public List<Location> getAllLocations() {
+        return locations;
+    }
+
+    
 }
