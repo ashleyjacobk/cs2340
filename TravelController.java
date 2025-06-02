@@ -1,3 +1,5 @@
+package cs2340;
+
 import java.util.*;
 import java.util.stream.Collectors;
 

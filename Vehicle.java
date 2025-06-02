@@ -1,3 +1,5 @@
+package cs2340;
+
 import java.util.ArrayList;
 
 /**
@@ -39,6 +41,8 @@ public class Vehicle {
     }
 
     private void Location getNextLocation() {
-
+        for(int i = 0; i < this.route.getLocations().length; i++) {
+            if this.
+        }
     }
 }
