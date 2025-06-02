@@ -39,6 +39,8 @@ public class Vehicle {
     }
 
     private void Location getNextLocation() {
-
+        for(int i = 0; i < this.route.getLocations().length; i++) {
+            if this.
+        }
     }
 }
