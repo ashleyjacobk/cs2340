@@ -1,16 +1,14 @@
 public class Vehicle {
     private String vehicleId;
     private String vehicleType;
-    private String licensePlate;
     private int capacity;
     private Route currentRoute;
     private Location currentLocation;
     private int currentPosition;
 
-    public Vehicle(String vehicleId, String vehicleType, String licensePlate, int capacity) {
+    public Vehicle(String vehicleId, String vehicleType, int capacity) {
         this.vehicleId = vehicleId;
         this.vehicleType = vehicleType;
-        this.licensePlate = licensePlate;
         this.capacity = capacity;
         this.currentPosition = -1;
     }
@@ -29,14 +27,6 @@ public class Vehicle {
 
     public void setVehicleType(String vehicleType) {
         this.vehicleType = vehicleType;
-    }
-
-    public String getLicensePlate() {
-        return licensePlate;
-    }
-
-    public void setLicensePlate(String licensePlate) {
-        this.licensePlate = licensePlate;
     }
 
     public int getCapacity() {
@@ -81,6 +71,6 @@ public class Vehicle {
 
     @Override
     public String toString() {
-        return vehicleId + " (" + vehicleType + ") - " + licensePlate;
+        return vehicleId + " (" + vehicleType + ") - ";
     }
 }
