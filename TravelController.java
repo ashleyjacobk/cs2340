@@ -75,8 +75,8 @@ public class TravelController {
         }
     }
 
-    private void createVehicle(String id, String type, String licensePlate, int capacity) {
-        vehicles.put(id, new Vehicle(capacity, type, id, licensePlate, null, null));
+    private void createVehicle(int capacity, String type, String id, String direction, Route route, Location currentLocation) {
+        vehicles.put(id, new Vehicle(capacity, type, id, direction, route, currentLocation));
         displayMessage("info", "Vehicle created: " + id);
     }
 
