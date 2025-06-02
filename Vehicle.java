@@ -1,5 +1,3 @@
-package cs2340;
-
 import java.util.ArrayList;
 
 /**
