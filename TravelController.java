@@ -30,7 +30,7 @@ public class TravelController {
 
                 switch (tokens[0]) {
                     case "create_vehicle":
-                        createVehicle(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4]));
+                        createVehicle(tokens[1], tokens[2], Integer.parseInt(tokens[4]));
                         break;
                     case "display_vehicles":
                         displayVehicles();
