@@ -1,3 +1,5 @@
+package cs2340;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,21 +9,21 @@ public class Route {
     private List<Vehicle> vehicles;
 
     public Route(String routeID) {
-        this.routeID = routeID;
+        this.routeId = routeID;
         locations = new ArrayList<Location>();
         vehicles = new ArrayList<Vehicle>();
     }
 
     public void add_location(Location newLoc, int position) {
         if (position < locations.size() && position >= 0) {
-            locations.add(int, newLoc);
+            locations.add(position, newLoc);
         } else {
             System.out.println("This position is invalid in the route");
         }
     }
 
     public void add_vehicle(Vehicle newVehicle) {
-        locations.add(newVehicle);
+        vehicles.add(newVehicle);
     }
 
     public void remove_position(int position) {
@@ -34,14 +36,14 @@ public class Route {
 
     public void display_route() {
         for (int i = 0; i < locations.size(); i++) {
-            System.out.print(locations[i].getName() + " ");
+            System.out.print(locations.get(i).getName() + " ");
         }
         System.out.println();
     }
 
     public void display_vehicles() {
-        for (int i = 0; i < vehicle.size(); i++) {
-            System.out.print(vehicle[i].getName() + " ");
+        for (int i = 0; i < vehicles.size(); i++) {
+            System.out.print(vehicles.get(i).getName() + " ");
         }
         System.out.println();
     }
