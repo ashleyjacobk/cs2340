@@ -1,10 +1,15 @@
 import java.util.ArrayList;
 
 /**
- * Class to define a vehicle within a route
+ * Creates a class for a vehicle which runs through locations on a specific route
+ * @author Group 10
+ * @version 1.0
  */
 public class Vehicle {
 
+    /**
+     * Creates
+     */
     public static ArrayList<Vehicle> totalVehicles = new ArrayList<>();
 
     private int currentCapacity;
@@ -18,12 +23,12 @@ public class Vehicle {
     private Location currentLocation;
     private Location nextLocation;
 
-    public Vehicle(int capacity, String type, String id, String lastStop, Route route, Location currentLocation) {
+    public Vehicle(int capacity, String type, String id, String direction, Route route, Location currentLocation) {
         this.currentCapacity = 0;
         this.totalCapacity = capacity;
         this.type = type;
         this.id = id;
-        this.direction = lastStop;
+        this.direction = direction;
         this.status = true;
         this.movement = false;
         this.route = route;
