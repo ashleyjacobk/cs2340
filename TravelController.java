@@ -30,13 +30,13 @@ public class TravelController {
 
                 switch (tokens[0]) {
                     case "create_vehicle":
-                        createVehicle(tokens[1], tokens[2], tokens[3], Integer.parseInt(tokens[4]));
+                        createVehicle(Integer.parseInt(tokens[1]), tokens[2], tokens[3], tokens[4], tokens[5], tokens[6]);
                         break;
                     case "display_vehicles":
                         displayVehicles();
                         break;
                     case "create_location":
-                        createLocation(tokens[1], tokens[2]);
+                        createLocation(tokens[1]);
                         break;
                     case "display_locations":
                         displayLocations();
@@ -75,8 +75,10 @@ public class TravelController {
         }
     }
 
-    private void createVehicle(int capacity, String type, String id, String direction, Route route, Location currentLocation) {
-        vehicles.put(id, new Vehicle(capacity, type, id, direction, route, currentLocation));
+    private void createVehicle(int capacity, String type, String id, String direction, String route, String currentLocation) {
+        Route routeObject = routes.get(route);
+        Location currentLocationObject = locations.get(currentLocation);
+        vehicles.put(id, new Vehicle(capacity, type, id, direction, routeObject, currentLocationObject));
         displayMessage("info", "Vehicle created: " + id);
     }
 
@@ -88,9 +90,9 @@ public class TravelController {
         vehicles.values().forEach(System.out::println);
     }
 
-    private void createLocation(String id, String name) {
-        locations.put(id, new Location(id, name));
-        displayMessage("info", "Location created: " + id);
+    private void createLocation(String name) {
+        locations.put(name, new Location(name));
+        displayMessage("info", "Location created: " + name);
     }
 
     private void displayLocations() {
