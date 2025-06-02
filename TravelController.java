@@ -64,6 +64,7 @@ public class TravelController {
                         break;
                     case "exit":
                         System.out.println("exit acknowledged");
+                        commandLineInput.close();
                         return;
                     default:
                         System.out.println("command " + tokens[0] + " NOT acknowledged");
