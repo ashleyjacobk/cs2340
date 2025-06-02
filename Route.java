@@ -4,52 +4,45 @@ import java.util.List;
 public class Route {
     private String routeId;
     private List<Location> locations;
-    private List<Vehicle> assignedVehicles;
+    private List<Vehicle> vehicles;
 
-    public Route(String routeId) {
-        this.routeId = routeId;
-        this.locations = new ArrayList<>();
-        this.assignedVehicles = new ArrayList<>();
+    public Route(String routeID) {
+        this.routeID = routeID;
+        locations = new ArrayList<Location>();
+        vehicles = new ArrayList<Vehicle>();
     }
 
-    public String getRouteId() {
-        return routeId;
-    }
-
-    public void addLocation(Location location, int position) {
-        if (position < 0 || position > locations.size()) {
-            throw new IllegalArgumentException("Invalid position");
-        }
-        locations.add(position, location);
-    }
-
-    public void removeLocation(int position) {
-        if (position < 0 || position >= locations.size()) {
-            throw new IllegalArgumentException("Invalid position");
-        }
-        locations.remove(position);
-    }
-
-    public List<Location> getLocations() {
-        return new ArrayList<>(locations);
-    }
-
-    public void assignVehicle(Vehicle vehicle) {
-        if (!assignedVehicles.contains(vehicle)) {
-            assignedVehicles.add(vehicle);
+    public void add_location(Location newLoc, int position) {
+        if (position < locations.length() && position >= 0) {
+            locations.add(int, newLoc);
+        } else {
+            System.out.println("This position is invalid in the route");
         }
     }
 
-    public void removeVehicle(Vehicle vehicle) {
-        assignedVehicles.remove(vehicle);
+    public void add_vehicle(Vehicle newVehicle) {
+        locations.add(newVehicle);
     }
 
-    public List<Vehicle> getAssignedVehicles() {
-        return new ArrayList<>(assignedVehicles);
+    public void remove_position(int position) {
+        if (position < locations.length() && position >= 0) {
+            locations.remove(position);
+        } else {
+            System.out.println("This position is not in the route");
+        }
     }
 
-    @Override
-    public String toString() {
-        return "Route " + routeId + ": " + locations.toString();
+    public void display_route() {
+        for (int i = 0; i < locations.length(); i++) {
+            System.out.print(locations[i].getName() + " ");
+        }
+        System.out.println();
+    }
+
+    public void display_vehicles() {
+        for (int i = 0; i < vehicle.length(); i++) {
+            System.out.print(vehicle[i].getName() + " ");
+        }
+        System.out.println();
     }
 }
