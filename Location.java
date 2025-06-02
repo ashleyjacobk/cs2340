@@ -1,32 +1,58 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Location {
-    private String locationId;
+    private String identifier;
     private String name;
-    private int passengerCount;
+    private int totalPassengers;
+    private boolean status;
+    private List<Vehicle> vehicles;
+    private static List<Location> locations = new ArrayList<>();
 
-    public Location(String locationId, String name) {
-        this.locationId = locationId;
+    /* CONSTRUCTERS */
+    public Location(String identifier, String name, int totalPassengers, boolean status) {
+        this.identifier = identifier;
         this.name = name;
-        this.passengerCount = 0;
+        this.totalPassengers = totalPassengers;
+        this.status = status;
+        this.vehicles = vehicle.getVehiclesAtLocation();
+        locations.add(this);
+    }
+    public Location(String identifier, String name, int totalPassengers) {
+        this(identifier, name, totalPassengers, true);
+    }
+    public Location(String identifier, String name) {
+        this(identifier, name, 0, true);
     }
 
-    public String getLocationId() {
-        return locationId;
+    /* GETTERS */
+    public String getIdentifier() {
+        return identifier;
     }
-
     public String getName() {
         return name;
     }
-
-    public int getPassengerCount() {
-        return passengerCount;
+    public int getTotalPassengers() {
+        return totalPassengers;
     }
-
-    public void setPassengerCount(int count) {
-        this.passengerCount = count;
+    public boolean getStatus() {
+        return status;
     }
-
-    @Override
-    public String toString() {
-        return locationId + ": " + name;
+    public List<Vehicle> getVehicles() {
+        return vehicles;
+    }
+    
+    /* SETTERS */
+    public String setIdentifier() {
+        return identifier;
+    }
+    public String setName() {
+        return name;
+    }
+    public int setTotalPassengers() {
+        return totalPassengers;
+    }
+    public boolean setStatus() {
+        return status;
     }
 }
