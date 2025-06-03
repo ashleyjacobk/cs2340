@@ -6,7 +6,7 @@ public class Location {
     private int totalPassengers;
     private boolean status;
     private List<Vehicle> vehicles;
-    private static List<Location> locations = new ArrayList<>();
+    // private static List<Location> locations = new ArrayList<>();
 
     /* CONSTRUCTERS */
     public Location(String name, int totalPassengers, boolean status) {
@@ -14,7 +14,7 @@ public class Location {
         this.totalPassengers = totalPassengers;
         this.status = status;
         this.vehicles = new ArrayList<>();
-        locations.add(this);
+        // locations.add(this);
     }
     public Location(String name, int totalPassengers) {
         this(name, totalPassengers, true);
@@ -49,7 +49,7 @@ public class Location {
     }
 
     /* METHODS */
-    public static List<Location> getAllLocations() {
-        return locations;
-    }
+    // public static List<Location> getAllLocations() {
+    //     return locations;
+    // }
 }

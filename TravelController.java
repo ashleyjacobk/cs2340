@@ -83,6 +83,12 @@ public class TravelController {
     }
 
     private void createVehicle(int capacity, String type, String id, String direction, String route, String currentLocation) {
+        if (vehicles.containsKey(id)) {
+            throw new IllegalArgumentException("Vehicle with ID " + id + " already exists");
+        }
+        if (routes.get(route) == null) {
+            throw new IllegalArgumentException("Route with ID " + route + " does not exist");
+        }
         Route routeObject = routes.get(route);
         Location currentLocationObject = locations.get(currentLocation);
         vehicles.put(id, new Vehicle(capacity, type, id, direction, routeObject, currentLocationObject));
@@ -94,10 +100,13 @@ public class TravelController {
             displayMessage("info", "No vehicles in service");
             return;
         }
-        vehicles.values().forEach(System.out::println);
+        vehicles.keySet().forEach(System.out::println);
     }
 
     private void createLocation(String name) {
+        if (locations.containsKey(name)) {
+            throw new IllegalArgumentException("Location with name " + name + " already exists");
+        }
         locations.put(name, new Location(name));
         displayMessage("info", "Location created: " + name);
     }
@@ -107,10 +116,13 @@ public class TravelController {
             displayMessage("info", "No locations available");
             return;
         }
-        locations.values().forEach(System.out::println);
+        locations.keySet().forEach(System.out::println);
     }
 
     private void createRoute(String id) {
+        if (routes.containsKey(id)) {
+            throw new IllegalArgumentException("Route with ID " + id + " already exists");
+        }
         routes.put(id, new Route(id));
         displayMessage("info", "Route created: " + id);
     }

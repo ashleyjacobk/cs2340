@@ -13,6 +13,7 @@ public class Vehicle {
      * Creates
      */
     private static ArrayList<Vehicle> totalVehicles = new ArrayList<>();
+    // private Random random = new Random();
 
     private int currentCapacity;
     private int totalCapacity;
