@@ -30,6 +30,9 @@ public class TravelController {
 
                 switch (tokens[0]) {
                     case "create_vehicle":
+                        if (tokens.length != 7) {
+                            throw new IllegalArgumentException("Invalid number of arguments for create_vehicle");
+                        }
                         createVehicle(Integer.parseInt(tokens[1]), tokens[2], tokens[3], tokens[4], tokens[5], tokens[6]);
                         break;
                     case "display_vehicles":
@@ -66,6 +69,10 @@ public class TravelController {
                         System.out.println("exit acknowledged");
                         commandLineInput.close();
                         return;
+                    case "help":
+                        System.out.println("Available commands:");
+                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_route, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, exit");
+                        break;
                     default:
                         System.out.println("command " + tokens[0] + " NOT acknowledged");
                 }
