@@ -31,7 +31,7 @@ public class TravelController {
                 switch (tokens[0]) {
                     case "create_vehicle":
                         if (tokens.length != 7) {
-                            throw new IllegalArgumentException("Invalid number of arguments for create_vehicle");
+                            throw new IllegalArgumentException("Correct usage for create_vehicle is: create_vehicle,<capacity>,<type>,<id>,<direction>,<route>,<currentLocation>");
                         }
                         createVehicle(Integer.parseInt(tokens[1]), tokens[2], tokens[3], tokens[4], tokens[5], tokens[6]);
                         break;
@@ -39,30 +39,51 @@ public class TravelController {
                         displayVehicles();
                         break;
                     case "create_location":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>");
+                        }
                         createLocation(tokens[1]);
                         break;
                     case "display_locations":
                         displayLocations();
                         break;
                     case "create_route":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for create_route is: create_route,<id>");
+                        }
                         createRoute(tokens[1]);
                         break;
                     case "add_location_to_route":
+                        if (tokens.length != 4) {
+                            throw new IllegalArgumentException("Correct usage for add_location_to_route is: add_location_to_route,<routeId>,<locationId>,<position>");
+                        }
                         addLocationToRoute(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
                         break;
                     case "remove_location_from_route":
+                        if (tokens.length != 3) {
+                            throw new IllegalArgumentException("Correct usage for remove_location_from_route is: remove_location_from_route,<routeId>,<position>");
+                        }
                         removeLocationFromRoute(tokens[1], Integer.parseInt(tokens[2]));
                         break;
                     case "display_route":
                         displayRoute(tokens[1]);
                         break;
                     case "set_vehicle_position":
+                        if (tokens.length != 4) {
+                            throw new IllegalArgumentException("Correct usage for set_vehicle_position is: set_vehicle_position,<vehicleId>,<routeId>,<position>");
+                        }
                         setVehiclePosition(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
                         break;
                     case "display_vehicles_at_location":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for display_vehicles_at_location is: display_vehicles_at_location,<locationId>");
+                        }
                         displayVehiclesAtLocation(tokens[1]);
                         break;
                     case "display_vehicles_on_route":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for display_vehicles_on_route is: display_vehicles_on_route,<routeId>");
+                        }
                         displayVehiclesOnRoute(tokens[1]);
                         break;
                     case "exit":
@@ -151,7 +172,7 @@ public class TravelController {
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");
         }
-        System.out.println(route);
+        route.display_route();
     }
 
     private void setVehiclePosition(String vehicleId, String routeId, int position) {
