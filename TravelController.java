@@ -65,11 +65,14 @@ public class TravelController {
                         }
                         removeLocationFromRoute(tokens[1], Integer.parseInt(tokens[2]));
                         break;
-                    case "display_route":
+                    case "display_locations_in_route":
                         if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for display_route is: display_route,<routeId>");
+                            throw new IllegalArgumentException("Correct usage for display_locations_in_route is: display_locations_in_route,<routeId>");
                         }
-                        displayRoute(tokens[1]);
+                        displayLocationsInRoute(tokens[1]);
+                        break;
+                    case "display_routes":
+                        displayRoutes();
                         break;
                     case "set_vehicle_position":
                         if (tokens.length != 4) {
@@ -95,7 +98,7 @@ public class TravelController {
                         return;
                     case "help":
                         System.out.println("Available commands:");
-                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_route, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, exit");
+                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, exit");
                         break;
                     default:
                         System.out.println("command " + tokens[0] + " NOT acknowledged");
@@ -170,12 +173,20 @@ public class TravelController {
         displayMessage("info", "Location removed from route " + routeId);
     }
 
-    private void displayRoute(String routeId) {
+    private void displayLocationsInRoute(String routeId) {
         Route route = routes.get(routeId);
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");
         }
         route.display_route();
+    }
+
+    private void displayRoutes() {
+        if (routes.isEmpty()) {
+            displayMessage("info", "No routes available");
+            return;
+        }
+        routes.keySet().forEach(System.out::println);
     }
 
     private void setVehiclePosition(String vehicleId, String routeId, int position) {
