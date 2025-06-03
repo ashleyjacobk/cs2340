@@ -49,9 +49,7 @@ public class Location {
     }
 
     /* METHODS */
-    public List<Location> getAllLocations() {
+    public static List<Location> getAllLocations() {
         return locations;
     }
-
-    
 }

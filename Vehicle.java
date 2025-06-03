@@ -11,7 +11,7 @@ public class Vehicle {
     /**
      * Creates
      */
-    public static ArrayList<Vehicle> totalVehicles = new ArrayList<>();
+    private static ArrayList<Vehicle> totalVehicles = new ArrayList<>();
 
     private int currentCapacity;
     private int totalCapacity;
@@ -84,6 +84,10 @@ public class Vehicle {
 
     public String getDirection() {
         return direction;
+    }
+
+    public static ArrayList<Vehicle> getTotalVehicles() {
+        return totalVehicles;
     }
 
     public void setCurrentRoute(Route route) {
