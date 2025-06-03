@@ -66,6 +66,9 @@ public class TravelController {
                         removeLocationFromRoute(tokens[1], Integer.parseInt(tokens[2]));
                         break;
                     case "display_route":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for display_route is: display_route,<routeId>");
+                        }
                         displayRoute(tokens[1]);
                         break;
                     case "set_vehicle_position":

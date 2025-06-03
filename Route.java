@@ -13,7 +13,7 @@ public class Route {
     }
 
     public void addLocation(Location newLoc, int position) {
-        if (position < locations.size() && position >= 0) {
+        if (position <= locations.size() && position >= 0) {
             locations.add(position, newLoc);
         } else {
             System.out.println("This position is invalid in the route");
@@ -25,7 +25,7 @@ public class Route {
     }
 
     public void removeLocation(int position) {
-        if (position < locations.size() && position >= 0) {
+        if (position <= locations.size() && position >= 0) {
             locations.remove(position);
         } else {
             System.out.println("This position is not in the route");
