@@ -105,4 +105,9 @@ public class Vehicle {
     public Location getCurrentLocation() {
         return currentLocation;
     }
+
+    @Override
+    public String toString() {
+        return "Vehicle " + this.id + " is at " + this.currentLocation + "and is a " + this.type;
+    }
 }
