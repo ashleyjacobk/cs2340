@@ -48,6 +48,11 @@ public class Location {
         return status;
     }
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
     /* METHODS */
     // public static List<Location> getAllLocations() {
     //     return locations;
