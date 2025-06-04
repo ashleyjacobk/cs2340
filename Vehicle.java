@@ -111,6 +111,6 @@ public class Vehicle {
 
     @Override
     public String toString() {
-        return "Vehicle " + this.id + " is at " + this.currentLocation + "and is a " + this.type;
+        return this.type + " " + this.id + " is at " + this.currentLocation + " on route " + this.route;
     }
 }

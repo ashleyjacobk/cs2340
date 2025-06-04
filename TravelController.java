@@ -127,7 +127,9 @@ public class TravelController {
         }
         Route routeObject = routes.get(route);
         Location currentLocationObject = locations.get(currentLocation);
-        vehicles.put(Integer.parseInt(id), new Vehicle(capacity, type, Integer.parseInt(id), direction, routeObject, currentLocationObject));
+        Vehicle vehicle = new Vehicle(capacity, type, Integer.parseInt(id), direction, routeObject, currentLocationObject);
+        vehicles.put(Integer.parseInt(id), vehicle);
+        routeObject.add_vehicle(vehicle);
         displayMessage("info", "Vehicle created: " + id);
     }
 
