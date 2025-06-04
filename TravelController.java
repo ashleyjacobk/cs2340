@@ -92,6 +92,15 @@ public class TravelController {
                         }
                         displayVehiclesOnRoute(tokens[1]);
                         break;
+                    // case "display_position_of_vehicle":
+                    //     if (tokens.length != 2) {
+                    //         throw new IllegalArgumentException("Correct usage for display_vehicles_at_location is: display_vehicles_at_location,<locationId>");
+                    //     }
+                    //     Vehicle vehicle = vehicles.get(tokens[1]);
+                    //     if (vehicle == null) {
+                    //         throw new IllegalArgumentException("Vehicle with ID " + tokens[1] + " does not exist");
+                    //     }
+                    //     System.out.println(vehicle.getType() + " " + vehicle.getId() + " is at location " + vehicle.getCurrentLocation().getName() + " on route" + vehicle.getRoute());
                     case "exit":
                         System.out.println("exit acknowledged");
                         commandLineInput.close();

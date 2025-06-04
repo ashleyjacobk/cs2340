@@ -92,6 +92,10 @@ public class Vehicle {
         return totalVehicles;
     }
 
+    public Route getRoute() {
+        return route;
+    }
+    
     public void setCurrentRoute(Route route) {
         this.route = route;
     }
