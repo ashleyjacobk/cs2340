@@ -201,7 +201,7 @@ public class TravelController {
     }
 
     private void setVehiclePosition(String vehicleId, String routeId, int position) {
-        Vehicle vehicle = vehicles.get(vehicleId);
+        Vehicle vehicle = vehicles.get(Integer.parseInt(vehicleId));
         Route route = routes.get(routeId);
         if (vehicle == null || route == null) {
             throw new IllegalArgumentException("Invalid vehicle or route ID");
