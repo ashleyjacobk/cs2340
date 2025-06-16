@@ -5,11 +5,22 @@ public class TravelController {
     private Map<String, Vehicle> vehicles;
     private Map<String, Location> locations;
     private Map<String, Route> routes;
+    private static final Set<String> usedIds = new HashSet<>();
+
 
     public TravelController() {
         this.vehicles = new TreeMap<>();
         this.locations = new TreeMap<>();
         this.routes = new TreeMap<>();
+    }
+    private void checkAndRegisterId(String id) {
+        if (!usedIds.add(id)) {
+            throw new IllegalArgumentException("ID '" + id + "' is already used");
+        }
+    }
+
+    private void unregisterId(String id) {
+        usedIds.remove(id);
     }
 
     public void commandLoop() {
@@ -31,7 +42,7 @@ public class TravelController {
                 switch (tokens[0]) {
                     case "create_vehicle":
                         if (tokens.length != 7) {
-                            throw new IllegalArgumentException("Correct usage for create_vehicle is: create_vehicle,<capacity>,<type>,<id>,<direction>,<route>,<currentLocation>");
+                            throw new IllegalArgumentException("Correct usage for create_vehicle is: create_vehicle,<capacity>,<type>,<id>,<direction>,<route>,<currentLocationID>");
                         }
                         createVehicle(Integer.parseInt(tokens[1]), tokens[2], tokens[3], tokens[4], tokens[5], tokens[6]);
                         break;
@@ -39,19 +50,19 @@ public class TravelController {
                         displayVehicles();
                         break;
                     case "create_location":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>");
+                        if (tokens.length != 3) {
+                            throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>,<id>");
                         }
-                        createLocation(tokens[1]);
+                        createLocation(tokens[1], tokens[2]);
                         break;
                     case "display_locations":
                         displayLocations();
                         break;
                     case "create_route":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for create_route is: create_route,<id>");
+                        if (tokens.length != 3) {
+                            throw new IllegalArgumentException("Correct usage for create_route is: create_route,<id>,<vehicleType>");
                         }
-                        createRoute(tokens[1]);
+                        createRoute(tokens[1], tokens[2]);
                         break;
                     case "add_location_to_route":
                         if (tokens.length != 4) {
@@ -119,17 +130,25 @@ public class TravelController {
     }
 
     private void createVehicle(int capacity, String type, String id, String direction, String route, String currentLocation) {
+
         if (vehicles.containsKey(id)) {
-            throw new IllegalArgumentException("Vehicle with ID " + id + " already exists");
+            throw new IllegalArgumentException("Vehicle with ID '" + id + "' already exists");
         }
-        if (routes.get(route) == null) {
-            throw new IllegalArgumentException("Route with ID " + route + " does not exist");
+
+        if (!routes.containsKey(route)) {
+            throw new IllegalArgumentException("Route with ID '" + route + "' does not exist");
         }
+
+        if (!locations.containsKey(currentLocation)) {
+            throw new IllegalArgumentException("Location with ID '" + currentLocation + "' does not exist");
+        }
+
         Route routeObject = routes.get(route);
         Location currentLocationObject = locations.get(currentLocation);
         Vehicle vehicle = new Vehicle(capacity, type, id, direction, routeObject, currentLocationObject);
-        vehicles.put(id, vehicle);
         routeObject.add_vehicle(vehicle);
+        checkAndRegisterId(id);
+        vehicles.put(id, vehicle);
         displayMessage("info", "Vehicle created: " + id);
     }
 
@@ -141,12 +160,14 @@ public class TravelController {
         vehicles.keySet().forEach(System.out::println);
     }
 
-    private void createLocation(String name) {
-        if (locations.containsKey(name)) {
-            throw new IllegalArgumentException("Location with name " + name + " already exists");
+    private void createLocation(String name, String id) {
+        checkAndRegisterId(id);
+        if (locations.containsKey(id)) {
+            unregisterId(id);
+            throw new IllegalArgumentException("Location with id " + id + " already exists");
         }
-        locations.put(name, new Location(name));
-        displayMessage("info", "Location created: " + name);
+        locations.put(id, new Location(name, id));
+        displayMessage("info", "Location created: " + name + "(ID: " + id + ")");
     }
 
     private void displayLocations() {
@@ -157,12 +178,13 @@ public class TravelController {
         locations.keySet().forEach(System.out::println);
     }
 
-    private void createRoute(String id) {
+    private void createRoute(String id, String vehicleType) {
+        checkAndRegisterId(id);
         if (routes.containsKey(id)) {
             throw new IllegalArgumentException("Route with ID " + id + " already exists");
         }
-        routes.put(id, new Route(id));
-        displayMessage("info", "Route created: " + id);
+        routes.put(id, new Route(id, vehicleType));
+        displayMessage("info", "Route for vehicle type " + vehicleType + " created (ID : " + id + ")");
     }
 
     private void addLocationToRoute(String routeId, String locationId, int position) {
@@ -176,6 +198,7 @@ public class TravelController {
     }
 
     private void removeLocationFromRoute(String routeId, int position) {
+
         Route route = routes.get(routeId);
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");

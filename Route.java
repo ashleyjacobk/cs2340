@@ -3,11 +3,19 @@ import java.util.List;
 
 public class Route {
     private String routeId;
+    private String vehicleType;
     private List<Location> locations;
     private List<Vehicle> vehicles;
 
-    public Route(String routeID) {
+    public Route(String routeID, String vehicleType) {
+        if (!routeID.matches("[a-zA-Z0-9]+")) {
+            throw new IllegalArgumentException("Route ID must be alphanumeric.");
+        }
+        if (routeID.length() > 100) {
+            throw new IllegalArgumentException("Route ID can not exceed 100 characters.");
+        }
         this.routeId = routeID;
+        this.vehicleType = vehicleType;
         locations = new ArrayList<Location>();
         vehicles = new ArrayList<Vehicle>();
     }
@@ -21,6 +29,9 @@ public class Route {
     }
 
     public void add_vehicle(Vehicle newVehicle) {
+        if (!vehicleType.equals(newVehicle.getType())) {
+            throw new IllegalArgumentException("You can only add vehicles of type " + vehicleType + " to this route.");
+        }
         vehicles.add(newVehicle);
     }
 
@@ -53,5 +64,10 @@ public class Route {
 
     public List<Vehicle> getVehicles() {
         return vehicles;
+    }
+
+    @Override
+    public String toString() {
+        return routeId;
     }
 }
