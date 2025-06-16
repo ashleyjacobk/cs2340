@@ -17,7 +17,7 @@ public class Vehicle {
     private int currentCapacity;
     private int totalCapacity;
     private String type;
-    private int id;
+    private String id;
     private String direction;
     private boolean status;
     private boolean movement;
@@ -25,7 +25,13 @@ public class Vehicle {
     private Location currentLocation;
     private Location nextLocation;
 
-    public Vehicle(int capacity, String type, int id, String direction, Route route, Location currentLocation) {
+    public Vehicle(int capacity, String type, String id, String direction, Route route, Location currentLocation) {
+        if (!id.matches("[a-zA-Z0-9]+")) {
+            throw new IllegalArgumentException("Vehicle ID must be alphanumeric.");
+        }
+        if (id.length() > 100) {
+            throw new IllegalArgumentException("Vehicle ID can not exceed 100 characters.");
+        }
         this.currentCapacity = 0;
         this.totalCapacity = capacity;
         this.type = type;
@@ -79,7 +85,7 @@ public class Vehicle {
         return type;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 

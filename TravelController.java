@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TravelController {
-    private Map<Integer, Vehicle> vehicles;
+    private Map<String, Vehicle> vehicles;
     private Map<String, Location> locations;
     private Map<String, Route> routes;
 
@@ -119,7 +119,7 @@ public class TravelController {
     }
 
     private void createVehicle(int capacity, String type, String id, String direction, String route, String currentLocation) {
-        if (vehicles.containsKey(Integer.parseInt(id))) {
+        if (vehicles.containsKey(id)) {
             throw new IllegalArgumentException("Vehicle with ID " + id + " already exists");
         }
         if (routes.get(route) == null) {
@@ -127,8 +127,8 @@ public class TravelController {
         }
         Route routeObject = routes.get(route);
         Location currentLocationObject = locations.get(currentLocation);
-        Vehicle vehicle = new Vehicle(capacity, type, Integer.parseInt(id), direction, routeObject, currentLocationObject);
-        vehicles.put(Integer.parseInt(id), vehicle);
+        Vehicle vehicle = new Vehicle(capacity, type, id, direction, routeObject, currentLocationObject);
+        vehicles.put(id, vehicle);
         routeObject.add_vehicle(vehicle);
         displayMessage("info", "Vehicle created: " + id);
     }
@@ -201,7 +201,7 @@ public class TravelController {
     }
 
     private void setVehiclePosition(String vehicleId, String routeId, int position) {
-        Vehicle vehicle = vehicles.get(Integer.parseInt(vehicleId));
+        Vehicle vehicle = vehicles.get(vehicleId);
         Route route = routes.get(routeId);
         if (vehicle == null || route == null) {
             throw new IllegalArgumentException("Invalid vehicle or route ID");
