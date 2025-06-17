@@ -11,12 +11,12 @@ public class Location {
 
     /* CONSTRUCTERS */
     public Location(String name, String id, int totalPassengers, boolean status) {
-        if (!id.matches("[a-zA-Z0-9]+")) {
-            throw new IllegalArgumentException("Location ID must be alphanumeric.");
-        }
-        if (id.length() > 100) {
-            throw new IllegalArgumentException("Location ID can not exceed 100 characters.");
-        }
+        // if (!id.matches("[a-zA-Z0-9]+")) {
+        //     throw new IllegalArgumentException("Location ID must be alphanumeric.");
+        // }
+        // if (id.length() > 100) {
+        //     throw new IllegalArgumentException("Location ID can not exceed 100 characters.");
+        // }
         this.name = name;
         this.id = id;
         this.totalPassengers = totalPassengers;
