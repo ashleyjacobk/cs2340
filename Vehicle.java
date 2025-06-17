@@ -24,6 +24,9 @@ public class Vehicle {
     private Route route;
     private Location currentLocation;
     private Location nextLocation;
+    private double speed;  // Speed in units per time
+    private double arrivalTime;  // Time when vehicle will arrive at next location
+    private boolean isAtLocation;  // Whether vehicle is at a location or between locations
 
     public Vehicle(int capacity, String type, String id, String direction, Route route, Location currentLocation) {
         if (!id.matches("[a-zA-Z0-9]+")) {
@@ -41,12 +44,15 @@ public class Vehicle {
         this.movement = false;
         this.route = route;
         this.currentLocation = currentLocation;
-        this.nextLocation = getNextLocation();
+        this.nextLocation = calculateNextLocation();
+        this.speed = 0.0;
+        this.arrivalTime = Double.POSITIVE_INFINITY;
+        this.isAtLocation = true;
 
         totalVehicles.add(this);
     }
 
-    private Location getNextLocation() {
+    private Location calculateNextLocation() {
         if (route == null || currentLocation == null) {
             return null;
         }
@@ -115,8 +121,56 @@ public class Vehicle {
         return currentLocation;
     }
 
+    public Location getNextLocation() {
+        return nextLocation;
+    }
+
+    public void setSpeed(double speed) {
+        if (speed < 0) {
+            throw new IllegalArgumentException("Speed cannot be negative");
+        }
+        this.speed = speed;
+        updateArrivalTime();
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public double getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public boolean isAtLocation() {
+        return isAtLocation;
+    }
+
+    private void updateArrivalTime() {
+        if (nextLocation == null || speed == 0) {
+            arrivalTime = Double.POSITIVE_INFINITY;
+            return;
+        }
+        double distance = currentLocation.getDistanceTo(nextLocation);
+        arrivalTime = distance / speed;
+    }
+
+    public void updateState(double currentTime) {
+        if (!isAtLocation && currentTime >= arrivalTime) {
+            // Vehicle has arrived at next location
+            currentLocation = nextLocation;
+            nextLocation = calculateNextLocation();
+            isAtLocation = true;
+            updateArrivalTime();
+        }
+    }
+
     @Override
     public String toString() {
-        return this.type + " " + this.id + " is at " + this.currentLocation + " on route " + getRoute().toString();
+        if (isAtLocation) {
+            return this.type + " " + this.id + " is at " + this.currentLocation + " on route " + getRoute().toString();
+        } else {
+            return this.type + " " + this.id + " is traveling from " + this.currentLocation + " to " + this.nextLocation + 
+                   " on route " + getRoute().toString() + " (arriving at " + String.format("%.2f", arrivalTime) + ")";
+        }
     }
 }

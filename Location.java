@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Location {
     private String name;
@@ -7,6 +9,7 @@ public class Location {
     private boolean status;
     private List<Vehicle> vehicles;
     private String id;
+    private Map<Location, Double> distances;  // Map of connected locations and their distances
     // private static List<Location> locations = new ArrayList<>();
 
     /* CONSTRUCTERS */
@@ -22,6 +25,7 @@ public class Location {
         this.totalPassengers = totalPassengers;
         this.status = status;
         this.vehicles = new ArrayList<>();
+        this.distances = new HashMap<>();
         // locations.add(this);
     }
     public Location(String name, String id, int totalPassengers) {
@@ -55,6 +59,22 @@ public class Location {
     }
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public void setDistanceTo(Location other, double distance) {
+        if (distance < 0) {
+            throw new IllegalArgumentException("Distance cannot be negative");
+        }
+        distances.put(other, distance);
+        other.distances.put(this, distance);  // Make it bidirectional
+    }
+
+    public double getDistanceTo(Location other) {
+        Double distance = distances.get(other);
+        if (distance == null) {
+            throw new IllegalArgumentException("No distance defined between " + this.name + " and " + other.name);
+        }
+        return distance;
     }
 
     @Override
