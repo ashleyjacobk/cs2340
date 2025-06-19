@@ -113,6 +113,7 @@ public class TravelController {
                         if (tokens.length != 2) {
                             throw new IllegalArgumentException("Correct usage for advance_time is: advance_time,<timePassed (HH.MM)>");
                         }
+                        tokens[1] = tokens[1].trim();
                         advanceTime(Double.parseDouble(tokens[1]));
                         break;
                     case "exit":
@@ -121,7 +122,7 @@ public class TravelController {
                         return;
                     case "help":
                         System.out.println("Available commands:");
-                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, exit");
+                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, advance_time, exit");
                         break;
                     default:
                         System.out.println("command " + tokens[0] + " NOT acknowledged");
