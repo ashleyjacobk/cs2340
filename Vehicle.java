@@ -24,6 +24,7 @@ public class Vehicle {
     private Route route;
     private Location currentLocation;
     private Location nextLocation;
+    private int speed;
 
     public Vehicle(int capacity, String type, String id, Location direction, Route route, Location currentLocation) {
         // if (!id.matches("[a-zA-Z0-9]+")) {
@@ -113,6 +114,12 @@ public class Vehicle {
 
     public Location getCurrentLocation() {
         return currentLocation;
+    }
+
+    public void setTravelSpeed(int speed) {
+        if (speed > 0) {
+            this.speed = speed;
+        }
     }
 
     @Override

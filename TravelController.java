@@ -5,22 +5,12 @@ public class TravelController {
     private Map<String, Vehicle> vehicles;
     private Map<String, Location> locations;
     private Map<String, Route> routes;
-    private static final Set<String> usedIds = new HashSet<>();
-
+    private double time = 0.0;
 
     public TravelController() {
         this.vehicles = new TreeMap<>();
         this.locations = new TreeMap<>();
         this.routes = new TreeMap<>();
-    }
-    private void checkAndRegisterId(String id) {
-        if (!usedIds.add(id)) {
-            throw new IllegalArgumentException("ID '" + id + "' is already used");
-        }
-    }
-
-    private void unregisterId(String id) {
-        usedIds.remove(id);
     }
 
     public void commandLoop() {
@@ -42,7 +32,7 @@ public class TravelController {
                 switch (tokens[0]) {
                     case "create_vehicle":
                         if (tokens.length != 7) {
-                            throw new IllegalArgumentException("Correct usage for create_vehicle is: create_vehicle,<capacity>,<type>,<id>,<direction>,<route>,<currentLocationID>");
+                            throw new IllegalArgumentException("Correct usage for create_vehicle is: create_vehicle,<capacity>,<type>,<id>,<direction>,<route>,<currentLocation>");
                         }
                         tokens[1] = tokens[1].trim();
                         createVehicle(Integer.parseInt(tokens[1]), tokens[2], tokens[3], tokens[4], tokens[5], tokens[6]);
@@ -51,19 +41,19 @@ public class TravelController {
                         displayVehicles();
                         break;
                     case "create_location":
-                        if (tokens.length != 3) {
-                            throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>,<id>");
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>");
                         }
-                        createLocation(tokens[1], tokens[2]);
+                        createLocation(tokens[1]);
                         break;
                     case "display_locations":
                         displayLocations();
                         break;
                     case "create_route":
-                        if (tokens.length != 3) {
-                            throw new IllegalArgumentException("Correct usage for create_route is: create_route,<id>,<vehicleType>");
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for create_route is: create_route,<id>");
                         }
-                        createRoute(tokens[1], tokens[2]);
+                        createRoute(tokens[1]);
                         break;
                     case "add_location_to_route":
                         if (tokens.length != 4) {
@@ -107,6 +97,9 @@ public class TravelController {
                         }
                         displayVehiclesOnRoute(tokens[1]);
                         break;
+                    case "display_time":
+                        System.out.printf("%.2f%n", getTime());
+                        break;
                     // case "display_position_of_vehicle":
                     //     if (tokens.length != 2) {
                     //         throw new IllegalArgumentException("Correct usage for display_vehicles_at_location is: display_vehicles_at_location,<locationId>");
@@ -116,6 +109,12 @@ public class TravelController {
                     //         throw new IllegalArgumentException("Vehicle with ID " + tokens[1] + " does not exist");
                     //     }
                     //     System.out.println(vehicle.getType() + " " + vehicle.getId() + " is at location " + vehicle.getCurrentLocation().getName() + " on route" + vehicle.getRoute());
+                    case "advance_time":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for advance_time is: advance_time,<timePassed (HH.MM)>");
+                        }
+                        advanceTime(Double.parseDouble(tokens[1]));
+                        break;
                     case "exit":
                         System.out.println("exit acknowledged");
                         commandLineInput.close();
@@ -152,13 +151,10 @@ public class TravelController {
         Location directionObject;
 
         if (vehicles.containsKey(id)) {
-            throw new IllegalArgumentException("Vehicle with ID '" + id + "' already exists");
+            throw new IllegalArgumentException("Vehicle with ID " + id + " already exists");
         }
-        if (!routes.containsKey(route)) {
-            throw new IllegalArgumentException("Route with ID '" + route + "' does not exist");
-        }
-        if (!locations.containsKey(currentLocation)) {
-            throw new IllegalArgumentException("Location with ID '" + currentLocation + "' does not exist");
+        if (routes.get(route) == null) {
+            throw new IllegalArgumentException("Route with ID " + route + " does not exist");
         }
         if (!validId(id)) {
             throw new IllegalArgumentException("Vehicle ID must be alphanumeric and not exceed 100 characters");
@@ -172,10 +168,7 @@ public class TravelController {
 
         Route routeObject = routes.get(route);
         Location currentLocationObject = locations.get(currentLocation);
-        Vehicle vehicle = new Vehicle(capacity, type, id, directionObject, routeObject, currentLocationObject);
-        routeObject.add_vehicle(vehicle);
-        checkAndRegisterId(id);
-        vehicles.put(id, vehicle);
+        vehicles.put(id, new Vehicle(capacity, type, id, direction, routeObject, currentLocationObject));
         displayMessage("info", "Vehicle created: " + id);
     }
 
@@ -187,20 +180,14 @@ public class TravelController {
         vehicles.keySet().forEach(System.out::println);
     }
 
-    private void createLocation(String name, String id) {
-        id = id.trim();
+    private void createLocation(String name) {
         name = name.trim();
 
-        if (!validId(id)) {
-            throw new IllegalArgumentException("Location ID must be alphanumeric and not exceed 100 characters");
+        if (locations.containsKey(name)) {
+            throw new IllegalArgumentException("Location with name " + name + " already exists");
         }
-        checkAndRegisterId(id);
-        if (locations.containsKey(id)) {
-            unregisterId(id);
-            throw new IllegalArgumentException("Location with id " + id + " already exists");
-        }
-        locations.put(id, new Location(name, id));
-        displayMessage("info", "Location created: " + name + "(ID: " + id + ")");
+        locations.put(name, new Location(name, null, 0, true));
+        displayMessage("info", "Location created: " + name);
     }
 
     private void displayLocations() {
@@ -211,9 +198,8 @@ public class TravelController {
         locations.keySet().forEach(System.out::println);
     }
 
-    private void createRoute(String id, String vehicleType) {
+    private void createRoute(String id) {
         id = id.trim();
-        vehicleType = vehicleType.trim();
 
         if (routes.containsKey(id)) {
             throw new IllegalArgumentException("Route with ID " + id + " already exists");
@@ -221,12 +207,11 @@ public class TravelController {
         if (!validId(id)) {
             throw new IllegalArgumentException("Route ID must be alphanumeric and not exceed 100 characters");
         }
-        checkAndRegisterId(id);
         if (routes.containsKey(id)) {
             throw new IllegalArgumentException("Route with ID " + id + " already exists");
         }
-        routes.put(id, new Route(id, vehicleType));
-        displayMessage("info", "Route for vehicle type " + vehicleType + " created (ID : " + id + ")");
+        routes.put(id, new Route(id, null));
+        displayMessage("info", "Route created: " + id);
     }
 
     private void addLocationToRoute(String routeId, String locationId, int position) {
@@ -322,5 +307,15 @@ public class TravelController {
 
     void displayMessage(String status, String text_output) {
         System.out.println(status.toUpperCase() + ": " + text_output);
+    }
+
+    private void advanceTime(double time) {
+        if (time > 0.0) {
+            this.time = (this.time + time) % 24;
+        }
+    }
+
+    private double getTime() {
+        return time;
     }
 }
