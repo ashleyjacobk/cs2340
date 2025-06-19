@@ -21,7 +21,7 @@ public class TravelController {
 
         while (true) {
             try {
-                System.out.print(" $> ");
+                System.out.print("$> ");
                 wholeInputLine = commandLineInput.nextLine();
                 tokens = wholeInputLine.split(DELIMITER);
 
@@ -34,6 +34,7 @@ public class TravelController {
                         if (tokens.length != 7) {
                             throw new IllegalArgumentException("Correct usage for create_vehicle is: create_vehicle,<capacity>,<type>,<id>,<direction>,<route>,<currentLocation>");
                         }
+                        tokens[1] = tokens[1].trim();
                         createVehicle(Integer.parseInt(tokens[1]), tokens[2], tokens[3], tokens[4], tokens[5], tokens[6]);
                         break;
                     case "display_vehicles":
@@ -58,12 +59,14 @@ public class TravelController {
                         if (tokens.length != 4) {
                             throw new IllegalArgumentException("Correct usage for add_location_to_route is: add_location_to_route,<routeId>,<locationId>,<position>");
                         }
+                        tokens[3] = tokens[3].trim();
                         addLocationToRoute(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
                         break;
                     case "remove_location_from_route":
                         if (tokens.length != 3) {
                             throw new IllegalArgumentException("Correct usage for remove_location_from_route is: remove_location_from_route,<routeId>,<position>");
                         }
+                        tokens[2] = tokens[2].trim();
                         removeLocationFromRoute(tokens[1], Integer.parseInt(tokens[2]));
                         break;
                     case "display_locations_in_route":
@@ -79,6 +82,7 @@ public class TravelController {
                         if (tokens.length != 4) {
                             throw new IllegalArgumentException("Correct usage for set_vehicle_position is: set_vehicle_position,<vehicleId>,<routeId>,<position>");
                         }
+                        tokens[3] = tokens[3].trim();
                         setVehiclePosition(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
                         break;
                     case "display_vehicles_at_location":
@@ -128,16 +132,43 @@ public class TravelController {
         }
     }
 
+    /**
+     * Helper method to validate ID format.
+     * 
+     * @param id
+     * @return true if the ID is valid, false otherwise.
+     */
+    private boolean validId(String id) { 
+        return id.matches("[A-Za-z0-9]+") && id.length() <= 100; 
+    }
+    
     private void createVehicle(int capacity, String type, String id, String direction, String route, String currentLocation) {
+        id = id.trim();
+        type = type.trim();
+        direction = direction.trim();
+        route = route.trim();
+        currentLocation = currentLocation.trim();
+        Location directionObject;
+
         if (vehicles.containsKey(id)) {
             throw new IllegalArgumentException("Vehicle with ID " + id + " already exists");
         }
         if (routes.get(route) == null) {
             throw new IllegalArgumentException("Route with ID " + route + " does not exist");
         }
+        if (!validId(id)) {
+            throw new IllegalArgumentException("Vehicle ID must be alphanumeric and not exceed 100 characters");
+        }
+
+        try {
+            directionObject = locations.get(direction);
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Direction location with ID '" + direction + "' does not exist");
+        }
+
         Route routeObject = routes.get(route);
         Location currentLocationObject = locations.get(currentLocation);
-        vehicles.put(id, new Vehicle(capacity, type, id, direction, routeObject, currentLocationObject));
+        vehicles.put(id, new Vehicle(capacity, type, id, directionObject, routeObject, currentLocationObject));
         displayMessage("info", "Vehicle created: " + id);
     }
 
@@ -150,6 +181,8 @@ public class TravelController {
     }
 
     private void createLocation(String name) {
+        name = name.trim();
+
         if (locations.containsKey(name)) {
             throw new IllegalArgumentException("Location with name " + name + " already exists");
         }
@@ -166,6 +199,14 @@ public class TravelController {
     }
 
     private void createRoute(String id) {
+        id = id.trim();
+
+        if (routes.containsKey(id)) {
+            throw new IllegalArgumentException("Route with ID " + id + " already exists");
+        }
+        if (!validId(id)) {
+            throw new IllegalArgumentException("Route ID must be alphanumeric and not exceed 100 characters");
+        }
         if (routes.containsKey(id)) {
             throw new IllegalArgumentException("Route with ID " + id + " already exists");
         }
@@ -174,6 +215,9 @@ public class TravelController {
     }
 
     private void addLocationToRoute(String routeId, String locationId, int position) {
+        routeId = routeId.trim();
+        locationId = locationId.trim();
+
         Route route = routes.get(routeId);
         Location location = locations.get(locationId);
         if (route == null || location == null) {
@@ -184,6 +228,8 @@ public class TravelController {
     }
 
     private void removeLocationFromRoute(String routeId, int position) {
+        routeId = routeId.trim();
+
         Route route = routes.get(routeId);
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");
@@ -193,6 +239,8 @@ public class TravelController {
     }
 
     private void displayLocationsInRoute(String routeId) {
+        routeId = routeId.trim();
+
         Route route = routes.get(routeId);
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");
@@ -209,6 +257,9 @@ public class TravelController {
     }
 
     private void setVehiclePosition(String vehicleId, String routeId, int position) {
+        vehicleId = vehicleId.trim();
+        routeId = routeId.trim();
+
         Vehicle vehicle = vehicles.get(vehicleId);
         Route route = routes.get(routeId);
         if (vehicle == null || route == null) {
@@ -220,6 +271,8 @@ public class TravelController {
     }
 
     private void displayVehiclesAtLocation(String locationId) {
+        locationId = locationId.trim();
+
         Location location = locations.get(locationId);
         if (location == null) {
             throw new IllegalArgumentException("Invalid location ID");
@@ -236,6 +289,8 @@ public class TravelController {
     }
 
     private void displayVehiclesOnRoute(String routeId) {
+        routeId = routeId.trim();
+
         Route route = routes.get(routeId);
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");

@@ -8,12 +8,12 @@ public class Route {
     private List<Vehicle> vehicles;
 
     public Route(String routeID, String vehicleType) {
-        if (!routeID.matches("[a-zA-Z0-9]+")) {
-            throw new IllegalArgumentException("Route ID must be alphanumeric.");
-        }
-        if (routeID.length() > 100) {
-            throw new IllegalArgumentException("Route ID can not exceed 100 characters.");
-        }
+        // if (!routeID.matches("[a-zA-Z0-9]+")) {
+        //     throw new IllegalArgumentException("Route ID must be alphanumeric.");
+        // }
+        // if (routeID.length() > 100) {
+        //     throw new IllegalArgumentException("Route ID can not exceed 100 characters.");
+        // }
         this.routeId = routeID;
         this.vehicleType = vehicleType;
         locations = new ArrayList<Location>();

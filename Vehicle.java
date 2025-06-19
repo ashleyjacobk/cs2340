@@ -26,18 +26,18 @@ public class Vehicle {
     private Location nextLocation;
     private int speed;
 
-    public Vehicle(int capacity, String type, String id, String direction, Route route, Location currentLocation) {
-        if (!id.matches("[a-zA-Z0-9]+")) {
-            throw new IllegalArgumentException("Vehicle ID must be alphanumeric.");
-        }
-        if (id.length() > 100) {
-            throw new IllegalArgumentException("Vehicle ID can not exceed 100 characters.");
-        }
+    public Vehicle(int capacity, String type, String id, Location direction, Route route, Location currentLocation) {
+        // if (!id.matches("[a-zA-Z0-9]+")) {
+        //     throw new IllegalArgumentException("Vehicle ID must be alphanumeric.");
+        // }
+        // if (id.length() > 100) {
+        //     throw new IllegalArgumentException("Vehicle ID can not exceed 100 characters.");
+        // }
         this.currentCapacity = 0;
         this.totalCapacity = capacity;
         this.type = type;
         this.id = id;
-        this.direction = direction;
+        this.direction = direction.getName();
         this.status = true;
         this.movement = false;
         this.route = route;
