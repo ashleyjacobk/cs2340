@@ -17,69 +17,57 @@ public class Vehicle {
     private int currentCapacity;
     private int totalCapacity;
     private String type;
-    private String id;
-    private String direction;
+    private final String ID; // should be final since id shouldnt be changed
     private boolean status;
     private boolean movement;
     private Route route;
     private Location currentLocation;
     private Location nextLocation;
-    private int speed;
+    private double speed; // in kph
+    private boolean inTransit = false;
 
-    public Vehicle(int capacity, String type, String id, Location direction, Route route, Location currentLocation) {
-        // if (!id.matches("[a-zA-Z0-9]+")) {
-        //     throw new IllegalArgumentException("Vehicle ID must be alphanumeric.");
-        // }
-        // if (id.length() > 100) {
-        //     throw new IllegalArgumentException("Vehicle ID can not exceed 100 characters.");
-        // }
+    public Vehicle(int capacity, String type, String id, Route route, Location currentLocation, double speed) {
         this.currentCapacity = 0;
         this.totalCapacity = capacity;
         this.type = type;
-        this.id = id;
-        this.direction = direction.getName();
+        this.ID = id;
         this.status = true;
         this.movement = false;
         this.route = route;
         this.currentLocation = currentLocation;
-        this.nextLocation = getNextLocation();
+        this.nextLocation = getNextLocationFromRoute();
+        this.speed = speed;
+        this.inTransit = false;
 
         totalVehicles.add(this);
     }
 
-    private Location getNextLocation() {
-        if (route == null || currentLocation == null) {
+    private Location getNextLocationFromRoute() {
+        if (route == null) {
             return null;
         }
         
         List<Location> routeLocations = route.getLocations();
+        if (routeLocations.isEmpty()) {
+            return null;
+        }
         int currentIndex = routeLocations.indexOf(currentLocation);
         
-        if (currentIndex == -1) {
-            return null;
+        if (currentIndex == routeLocations.size() - 1) {
+            return routeLocations.get(0); // if at last location, return to first location
+        } else if (currentIndex >= 0) {
+            return routeLocations.get(currentIndex + 1); // return next location in the route
         }
         
-        // Find the destination location
-        Location destination = null;
-        for (Location loc : routeLocations) {
-            if (loc.getName().equals(direction)) {
-                destination = loc;
-                break;
-            }
-        }
-        
-        if (destination == null) {
-            return null;
-        }
-        
-        int destIndex = routeLocations.indexOf(destination);
-        if (currentIndex < destIndex) {
-            return routeLocations.get(currentIndex + 1);
-        } else if (currentIndex > destIndex) {
-            return routeLocations.get(currentIndex - 1);
-        }
-        
-        return null;
+        return null; // if current location is not found in the route
+    }
+
+    public boolean isInTransit() {
+        return inTransit;
+    }
+    
+    public Location getNextLocation() {
+        return nextLocation;
     }
 
     public String getType() {
@@ -87,11 +75,7 @@ public class Vehicle {
     }
 
     public String getId() {
-        return id;
-    }
-
-    public String getDirection() {
-        return direction;
+        return ID;
     }
 
     public static ArrayList<Vehicle> getTotalVehicles() {
@@ -108,7 +92,7 @@ public class Vehicle {
 
     public void setCurrentPosition(int position) {
         if (route != null && position >= 0 && position < route.getLocations().size()) {
-            this.currentLocation = route.getLocations().get(position);
+            arriveAt(route.getLocations().get(position));
         }
     }
 
@@ -116,14 +100,28 @@ public class Vehicle {
         return currentLocation;
     }
 
-    public void setTravelSpeed(int speed) {
+    public double getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(double speed) {
         if (speed > 0) {
             this.speed = speed;
         }
     }
 
+    public void setInTransit() {
+        this.inTransit = true;
+        this.currentLocation = null; // Clear current location when in transit
+    }
+
+    public void arriveAt(Location location) {
+        this.inTransit = false;
+        this.currentLocation = location;
+    }
+
     @Override
     public String toString() {
-        return this.type + " " + this.id + " is at " + this.currentLocation + " on route " + getRoute().toString();
+        return this.type + " " + this.ID + " is at " + this.currentLocation + " on route " + getRoute().toString();
     }
 }
