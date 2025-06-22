@@ -19,8 +19,7 @@ public class ArrivalEvent implements Event {
     @Override
     public void execute() {
         vehicle.arriveAt(destination);
-        System.out.println("TIME: " + time + " - ARRIVE: Vehicle " + vehicle.getId() + " has arrived at " + destination.getName() + ".");
-
+        controller.displayMessage("info", "Vehicle " + vehicle.getId() + " has arrived at " + destination.getName() + ".");
         int departureTime = this.time + 1;
         DepartureEvent departureEvent = new DepartureEvent(departureTime, vehicle, controller);
         controller.addEvent(departureEvent);

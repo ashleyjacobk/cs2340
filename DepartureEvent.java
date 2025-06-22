@@ -20,12 +20,12 @@ public class DepartureEvent implements Event {
         Location nextLocation = vehicle.getNextLocation();
 
         if (nextLocation == null) {
-            System.out.println("INFO: Vehicle " + vehicle.getId() + " has no next location to depart to.");
+            controller.displayMessage("info", "Vehicle " + vehicle.getId() + " has no next location to depart to.");
             return;
         }
 
         vehicle.setInTransit();
-        System.out.println("TIME: " + time + " - DEPART: Vehicle " + vehicle.getId() + " is departing from " + currentLocation.getName() + " towards " + nextLocation.getName() + ".");
+        controller.displayMessage("info", "Vehicle " + vehicle.getId() + " is departing from " + currentLocation.getName() + " towards " + nextLocation.getName() + ".");
 
         double distance = currentLocation.distanceTo(nextLocation);
         int travelTime = controller.computeTravelMinutes(distance, vehicle.getSpeed());
