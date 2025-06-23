@@ -326,6 +326,10 @@ public class TravelController {
         if (route == null || location == null) {
             throw new IllegalArgumentException("Invalid route or location ID");
         }
+        if (route.getLocations().contains(location)) {
+            displayMessage("error", "Location " + location.getName() + " already exists in route " + routeId);
+            return;
+        }
         route.addLocation(location, position);
         displayMessage("info", "Location " + location.getName() + " added to route " + routeId);
     }
