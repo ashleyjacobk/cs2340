@@ -528,6 +528,12 @@ public class TravelController {
             displayMessage("error", "Cannot go backwards in time.");
             return;
         }
+
+        displayMessage("info", "Advancing time from " + time + " to " + newTime);
+        while (!eventQueue.isEmpty() && eventQueue.peek().getTime() <= newTime) {
+            advanceToNextEvent();
+        }
+
         time = newTime;
         displayMessage("info", "Time is now " + time);
     }
