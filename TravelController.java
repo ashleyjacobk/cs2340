@@ -221,6 +221,7 @@ public class TravelController {
 
         Vehicle vehicle = new Vehicle(capacity, vehicleType, id, routeObject, currentLocationObject, speed);
         vehicles.put(id, vehicle);
+        routeObject.add_vehicle(vehicle);
         displayMessage("info", "Vehicle created: " + id);
 
         // Scheduling first departure event
@@ -254,6 +255,9 @@ public class TravelController {
 
         if (locations.containsKey(name)) {
             throw new IllegalArgumentException("Location with name " + name + " already exists");
+        }
+        if (!validId(id)) {
+            throw new IllegalArgumentException("Location ID must be alphanumeric and not exceed 100 characters");
         }
         if (!isIdGloballyUnique(id)) {
             throw new IllegalArgumentException("ID " + id + " is not globally unique across vehicles, locations, and routes");

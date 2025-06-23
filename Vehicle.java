@@ -117,6 +117,7 @@ public class Vehicle {
 
     @Override
     public String toString() {
-        return this.type + " " + this.ID + " is at " + this.currentLocation + " on route " + getRoute().toString();
+        String locationStr = (currentLocation != null) ? currentLocation.getName() : "in transit";
+        return this.type + " " + this.ID + " is at " + locationStr + " on route " + getRoute().toString();
     }
 }
