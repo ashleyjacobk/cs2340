@@ -47,8 +47,8 @@ public class TravelController {
                         displayVehicles();
                         break;
                     case "create_location":
-                        if (tokens.length != 4) {
-                            throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>,<x>,<y>");
+                        if (tokens.length != 5) {
+                            throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>,<id>,<x>,<y>");
                         }
                         tokens[3] = tokens[3].trim();
                         tokens[4] = tokens[4].trim();
@@ -208,6 +208,9 @@ public class TravelController {
         if (routes.get(route) == null) {
             throw new IllegalArgumentException("Route with ID " + route + " does not exist");
         }
+        if (vehicleType.equals(routeObject.getVehicleType()) == false) {
+            throw new IllegalArgumentException("Vehicle type " + vehicleType + " does not match route type " + routeObject.getVehicleType());
+        }
         Location currentLocationObject = locations.get(currentLocation);
         if (currentLocationObject == null) {
             throw new IllegalArgumentException("Current location with ID '" + currentLocation + "' does not exist");
@@ -255,7 +258,7 @@ public class TravelController {
         if (!isIdGloballyUnique(id)) {
             throw new IllegalArgumentException("ID " + id + " is not globally unique across vehicles, locations, and routes");
         }
-        locations.put(name, new Location(name, id, 0, true, x, y));
+        locations.put(id, new Location(name, id, 0, true, x, y));
         displayMessage("info", "Location created: " + name + " at ("+x+","+y+")");
     }
 
@@ -267,7 +270,7 @@ public class TravelController {
             displayMessage("info", "No locations available");
             return;
         }
-        locations.keySet().forEach(System.out::println);
+        locations.values().forEach(location -> System.out.println(location.getId()));
     }
 
     /**
@@ -324,7 +327,7 @@ public class TravelController {
             throw new IllegalArgumentException("Invalid route or location ID");
         }
         route.addLocation(location, position);
-        displayMessage("info", "Location " + locationId + " added to route " + routeId);
+        displayMessage("info", "Location " + location.getName() + " added to route " + routeId);
     }
 
     /**
@@ -335,13 +338,40 @@ public class TravelController {
      */
     private void removeLocationFromRoute(String routeId, int position) {
         routeId = routeId.trim();
-
         Route route = routes.get(routeId);
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");
         }
+        if (position < 0 || position >= route.getLocations().size()) {
+            throw new IllegalArgumentException("Invalid position for route " + routeId);
+        }
+        Location location = route.getLocations().get(position);
+        // find vehicles at this location and store in an arraylist
+        List<Vehicle> vehiclesAtLocation = new ArrayList<>();
+        for (Vehicle vehicle : vehicles.values()) {
+            if (vehicle.getRoute() == route && vehicle.getCurrentLocation() == location) {
+                vehiclesAtLocation.add(vehicle);
+            }
+        }
+        // remove location from route
         route.removeLocation(position);
         displayMessage("info", "Location removed from route " + routeId);
+        // if there are vehicles at this location, set their current position to the next location in the route
+        for (Vehicle vehicle : vehiclesAtLocation) {
+            if (route.getLocations().isEmpty()) {
+                vehicle.setCurrentPosition(0); // if no locations left, reset to first position
+                displayMessage("info", "Vehicle " + vehicle.getId() + " is on the empty route " + routeId + " and has been stopped.");
+                continue;
+            }
+            int nextPosition = position;
+            if (nextPosition >= route.getLocations().size()) {
+                nextPosition = 0; // wrap around to the first location if at the end
+            }
+            displayMessage("info", "Vehicle " + vehicle.getId() + " repositioned to " + route.getLocations().get(nextPosition).getName());
+            vehicle.setCurrentPosition(nextPosition);
+            Location nextLocation = vehicle.getNextLocation();
+            displayMessage("info", "Vehicle " + vehicle.getId() + " will now travel to " + (nextLocation != null ? nextLocation.getName() : "no next location"));
+        }
     }
 
     /**

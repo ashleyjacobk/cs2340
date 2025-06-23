@@ -60,6 +60,13 @@ public class Route {
         return vehicles;
     }
 
+    public String getRouteId() {
+        return routeId;
+    }
+    public VehicleType getVehicleType() {
+        return vehicleType;
+    }
+
     @Override
     public String toString() {
         return routeId;
