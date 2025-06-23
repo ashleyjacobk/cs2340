@@ -7,16 +7,11 @@ import java.util.List;
  * @version 1.0
  */
 public class Vehicle {
-
-    /**
-     * Creates
-     */
     private static ArrayList<Vehicle> totalVehicles = new ArrayList<>();
-    // private Random random = new Random();
 
     private int currentCapacity;
     private int totalCapacity;
-    private String type;
+    private VehicleType type;
     private final String ID; // should be final since id shouldnt be changed
     private boolean status;
     private boolean movement;
@@ -26,7 +21,7 @@ public class Vehicle {
     private double speed; // in kph
     private boolean inTransit = false;
 
-    public Vehicle(int capacity, String type, String id, Route route, Location currentLocation, double speed) {
+    public Vehicle(int capacity, VehicleType type, String id, Route route, Location currentLocation, double speed) {
         this.currentCapacity = 0;
         this.totalCapacity = capacity;
         this.type = type;
@@ -70,7 +65,7 @@ public class Vehicle {
         return nextLocation;
     }
 
-    public String getType() {
+    public VehicleType getType() {
         return type;
     }
 

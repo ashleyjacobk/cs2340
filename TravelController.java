@@ -50,18 +50,18 @@ public class TravelController {
                         if (tokens.length != 4) {
                             throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>,<x>,<y>");
                         }
-                        tokens[2] = tokens[2].trim();
                         tokens[3] = tokens[3].trim();
-                        createLocation(tokens[1], Double.parseDouble(tokens[2]), Double.parseDouble(tokens[3])); // 2 and 3 are x and y respectively
+                        tokens[4] = tokens[4].trim();
+                        createLocation(tokens[1], tokens[2], Double.parseDouble(tokens[3]), Double.parseDouble(tokens[4])); // 2 and 3 are x and y respectively
                         break;
                     case "display_locations":
                         displayLocations();
                         break;
                     case "create_route":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for create_route is: create_route,<id>");
+                        if (tokens.length != 3) {
+                            throw new IllegalArgumentException("Correct usage for create_route is: create_route,<id>,<vehicleType>");
                         }
-                        createRoute(tokens[1]);
+                        createRoute(tokens[1], tokens[2]);
                         break;
                     case "add_location_to_route":
                         if (tokens.length != 4) {
@@ -106,7 +106,7 @@ public class TravelController {
                         displayVehiclesOnRoute(tokens[1]);
                         break;
                     case "display_time":
-                        System.out.printf("%.2f%n", getTime());
+                        System.out.printf("%.2f%n", (double) getTime());
                         break;
                     case "advance_time":
                         if (tokens.length != 2) {
@@ -162,23 +162,47 @@ public class TravelController {
     }
 
     /**
+     * Checks if the ID is globally unique across vehicles, locations, and routes.
+     * 
+     * @param id
+     * @return true if the ID is globally unique, false otherwise.
+     */
+    private boolean isIdGloballyUnique(String id) {
+        return !vehicles.containsKey(id) && !locations.containsKey(id) && !routes.containsKey(id);
+    }
+
+    /**
      * Creates a vehicle with the specified parameters.
      * @throws IllegalArgumentException if the vehicle ID already exists, or if the route does not exist, or if the ID is invalid.
      * @param capacity
      * @param type
      * @param id
-     * @param direction
      * @param route
      * @param currentLocation
+     * @param speed
      */
     private void createVehicle(int capacity, String type, String id, String route, String currentLocation, double speed) {
+        VehicleType vehicleType;
         id = id.trim();
-        type = type.trim();
         route = route.trim();
         currentLocation = currentLocation.trim();
+        try {
+            type = type.trim().toUpperCase();
+            if (type.equals("U-BAHN")) {
+                type = "U_BAHN";
+            } else if (type.equals("S-BAHN")) {
+                type = "S_BAHN";
+            }
+            vehicleType = VehicleType.valueOf(type);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Vehicle type must be U-BAHN, S-BAHN, BUS, or TRAM");
+        }
 
         if (vehicles.containsKey(id)) {
             throw new IllegalArgumentException("Vehicle with ID " + id + " already exists");
+        }
+        if (!isIdGloballyUnique(id)) {
+            throw new IllegalArgumentException("ID " + id + " is not globally unique across vehicles, locations, and routes");
         }
         Route routeObject = routes.get(route);
         if (routes.get(route) == null) {
@@ -192,7 +216,7 @@ public class TravelController {
             throw new IllegalArgumentException("Vehicle ID must be alphanumeric and not exceed 100 characters");
         }
 
-        Vehicle vehicle = new Vehicle(capacity, type, id, routeObject, currentLocationObject, speed);
+        Vehicle vehicle = new Vehicle(capacity, vehicleType, id, routeObject, currentLocationObject, speed);
         vehicles.put(id, vehicle);
         displayMessage("info", "Vehicle created: " + id);
 
@@ -215,17 +239,24 @@ public class TravelController {
 
     /**
      * Creates a location with the specified name.
-     * @throws IllegalArgumentException if the location already exists.
+     * @throws IllegalArgumentException if the location already exists or if the ID is not globally unique.
      * @param name
+     * @param id usually an abbreviation of the name, but can be anything
+     * @param x
+     * @param y
      */
-    private void createLocation(String name, double longitude, double latitude) {
+    private void createLocation(String name, String id, double x, double y) {
         name = name.trim();
+        id = id.trim();
 
         if (locations.containsKey(name)) {
             throw new IllegalArgumentException("Location with name " + name + " already exists");
         }
-        locations.put(name, new Location(name, name, 0, true, longitude, latitude));
-        displayMessage("info", "Location created: " + name + " at ("+longitude+","+latitude+")");
+        if (!isIdGloballyUnique(id)) {
+            throw new IllegalArgumentException("ID " + id + " is not globally unique across vehicles, locations, and routes");
+        }
+        locations.put(name, new Location(name, id, 0, true, x, y));
+        displayMessage("info", "Location created: " + name + " at ("+x+","+y+")");
     }
 
     /**
@@ -241,14 +272,30 @@ public class TravelController {
 
     /**
      * Creates a route with the specified ID.
-     * @throws IllegalArgumentException if the route ID already exists or is invalid.
+     * @throws IllegalArgumentException if the route ID already exists or is invalid, or if the ID is not globally unique.
      * @param id
+     * @param type
      */
-    private void createRoute(String id) {
+    private void createRoute(String id, String type) {
+        VehicleType vehicleType;
         id = id.trim();
+        try {
+            type = type.trim().toUpperCase();
+            if (type.equals("U-BAHN")) {
+                type = "U_BAHN";
+            } else if (type.equals("S-BAHN")) {
+                type = "S_BAHN";
+            }
+            vehicleType = VehicleType.valueOf(type);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Vehicle type must be U-BAHN, S-BAHN, BUS, or TRAM");
+        }
 
         if (routes.containsKey(id)) {
             throw new IllegalArgumentException("Route with ID " + id + " already exists");
+        }
+        if (!isIdGloballyUnique(id)) {
+            throw new IllegalArgumentException("ID " + id + " is not globally unique across vehicles, locations, and routes");
         }
         if (!validId(id)) {
             throw new IllegalArgumentException("Route ID must be alphanumeric and not exceed 100 characters");
@@ -256,7 +303,7 @@ public class TravelController {
         if (routes.containsKey(id)) {
             throw new IllegalArgumentException("Route with ID " + id + " already exists");
         }
-        routes.put(id, new Route(id, null));
+        routes.put(id, new Route(id, vehicleType));
         displayMessage("info", "Route created: " + id);
     }
 
