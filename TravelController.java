@@ -518,7 +518,7 @@ public class TravelController {
             return;
         }
         Event nextEvent = eventQueue.poll();
-        time = nextEvent.getTime();
+        time = Math.max(time, nextEvent.getTime());
         nextEvent.execute();
         displayMessage("info", "Advanced to time: " + time + " and executed " + nextEvent);
     }
