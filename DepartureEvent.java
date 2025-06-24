@@ -24,6 +24,12 @@ public class DepartureEvent implements Event {
             return;
         }
 
+        // for the edge case of single location routes
+        if (currentLocation.equals(nextLocation)) {
+            controller.displayMessage("info", "Vehicle " + vehicle.getId() + " is already at " + currentLocation.getName() + " and will not depart.");
+            return;
+        }
+
         vehicle.setInTransit();
         controller.displayMessage("info", "Vehicle " + vehicle.getId() + " is departing from " + currentLocation.getName() + " towards " + nextLocation.getName() + ".");
 

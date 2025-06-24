@@ -110,10 +110,17 @@ public class TravelController {
                         break;
                     case "advance_time":
                         if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for advance_time is: advance_time,<new_time>");
+                            throw new IllegalArgumentException("Correct usage for advance_time is: advance_time,<time_to_advance>");
                         }
                         tokens[1] = tokens[1].trim();
                         advanceTime(Integer.parseInt(tokens[1]));
+                        break;
+                    case "jump_to_time":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for jump_to_time is: jump_to_time,<new_time>");
+                        }
+                        tokens[1] = tokens[1].trim();
+                        jumpToTime(Integer.parseInt(tokens[1]));
                         break;
                     case "set_vehicle_speed":
                         if (tokens.length != 3) {
@@ -140,7 +147,7 @@ public class TravelController {
                         return;
                     case "help":
                         System.out.println("Available commands:");
-                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, display_time, advance_time, set_vehicle_speed, advance_time_to_next_event, display_next_event, display_vehicle_status, exit");
+                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, display_time, advance_time, jump_to_time, set_vehicle_speed, advance_time_to_next_event, display_next_event, display_vehicle_status, exit");
                         break;
                     default:
                         System.out.println("command " + tokens[0] + " NOT acknowledged");
@@ -238,7 +245,7 @@ public class TravelController {
             displayMessage("info", "No vehicles in service");
             return;
         }
-        vehicles.keySet().forEach(System.out::println);
+        vehicles.values().forEach(System.out::println);
     }
 
     /**
@@ -334,8 +341,14 @@ public class TravelController {
             displayMessage("error", "Location " + location.getName() + " already exists in route " + routeId);
             return;
         }
-        route.addLocation(location, position);
-        displayMessage("info", "Location " + location.getName() + " added to route " + routeId);
+        boolean added = route.addLocation(location, position);
+        if (added) {
+            displayMessage("info", "Location " + location.getName() + " added to route " + routeId + " at position " + position);
+        } else {
+            throw new IllegalArgumentException("Invalid position for route " + routeId);
+        }
+        // route.addLocation(location, position);
+        // displayMessage("info", "Location " + location.getName() + " added to route " + routeId);
     }
 
     /**
@@ -422,6 +435,10 @@ public class TravelController {
         Route route = routes.get(routeId);
         if (vehicle == null || route == null) {
             throw new IllegalArgumentException("Invalid vehicle or route ID");
+        }
+        // check to make sure the position is valid and exists
+        if (position < 0 || position >= route.getLocations().size()) {
+            throw new IllegalArgumentException("Invalid position for route " + routeId);
         }
         vehicle.setCurrentRoute(route);
         vehicle.setCurrentPosition(position);
@@ -523,19 +540,28 @@ public class TravelController {
         displayMessage("info", "Advanced to time: " + time + " and executed " + nextEvent);
     }
 
-    public void advanceTime(int newTime) {
+    public void jumpToTime(int newTime) {
         if (newTime <= time) {
             displayMessage("error", "Cannot go backwards in time.");
             return;
         }
 
-        displayMessage("info", "Advancing time from " + time + " to " + newTime);
+        displayMessage("info", "Jumping time from " + time + " to " + newTime);
         while (!eventQueue.isEmpty() && eventQueue.peek().getTime() <= newTime) {
             advanceToNextEvent();
         }
 
         time = newTime;
         displayMessage("info", "Time is now " + time);
+    }
+
+    public void advanceTime(int minutes) {
+        if (minutes <= 0) {
+            throw new IllegalArgumentException("Time to advance must be greater than zero.");
+        }
+        int newTime = time + minutes;
+        displayMessage("info", "Advancing time from " + time + " to " + newTime);
+        jumpToTime(newTime);
     }
 
     public int getTime() {

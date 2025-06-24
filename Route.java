@@ -14,11 +14,13 @@ public class Route {
         vehicles = new ArrayList<Vehicle>();
     }
 
-    public void addLocation(Location newLoc, int position) {
+    public boolean addLocation(Location newLoc, int position) {
         if (position <= locations.size() && position >= 0) {
             locations.add(position, newLoc);
+            return true;
         } else {
-            System.out.println("This position is invalid in the route");
+            // System.out.println("This position is invalid in the route");
+            return false;
         }
     }
 
@@ -38,10 +40,18 @@ public class Route {
     }
 
     public void display_route() {
-        for (int i = 0; i < locations.size(); i++) {
-            System.out.print(locations.get(i).getName() + " ");
+        if (locations.isEmpty()) {
+            System.out.println("[]");
+            return;
         }
-        System.out.println();
+        System.out.print("[");
+        for (int i = 0; i < locations.size(); i++) {
+            System.out.print(locations.get(i).getName());
+            if (i < locations.size() - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println("]");
     }
 
     public void display_vehicles() {

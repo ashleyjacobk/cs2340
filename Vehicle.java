@@ -17,7 +17,7 @@ public class Vehicle {
     private boolean movement;
     private Route route;
     private Location currentLocation;
-    private Location nextLocation;
+    //private Location nextLocation;
     private double speed; // in kph
     private boolean inTransit = false;
 
@@ -30,14 +30,14 @@ public class Vehicle {
         this.movement = false;
         this.route = route;
         this.currentLocation = currentLocation;
-        this.nextLocation = getNextLocationFromRoute();
+        //this.nextLocation = getNextLocationFromRoute();
         this.speed = speed;
         this.inTransit = false;
 
         totalVehicles.add(this);
     }
 
-    private Location getNextLocationFromRoute() {
+    public Location getNextLocation() {
         if (route == null) {
             return null;
         }
@@ -48,21 +48,18 @@ public class Vehicle {
         }
         int currentIndex = routeLocations.indexOf(currentLocation);
         
+        if (currentIndex == -1) {
+            return routeLocations.get(0); // current location not found in the route
+        }
         if (currentIndex == routeLocations.size() - 1) {
             return routeLocations.get(0); // if at last location, return to first location
-        } else if (currentIndex >= 0) {
+        } else {
             return routeLocations.get(currentIndex + 1); // return next location in the route
         }
-        
-        return null; // if current location is not found in the route
     }
 
     public boolean isInTransit() {
         return inTransit;
-    }
-    
-    public Location getNextLocation() {
-        return nextLocation;
     }
 
     public VehicleType getType() {
