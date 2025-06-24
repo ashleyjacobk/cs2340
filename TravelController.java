@@ -274,7 +274,7 @@ public class TravelController {
             displayMessage("info", "No locations available");
             return;
         }
-        locations.values().forEach(location -> System.out.println(location.getId()));
+        locations.values().forEach(location -> System.out.println(location.getName()));
     }
 
     /**
