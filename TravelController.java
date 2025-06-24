@@ -15,8 +15,6 @@ public class TravelController {
         this.vehicles = new TreeMap<>();
         this.locations = new TreeMap<>();
         this.routes = new TreeMap<>();
-        this.currentTime = 0.0;
-        this.eventQueue = new PriorityQueue<>();
     }
 
     public void commandLoop() {

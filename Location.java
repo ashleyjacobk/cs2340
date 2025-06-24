@@ -1,7 +1,5 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 public class Location {
     private String name;
@@ -72,9 +70,4 @@ public class Location {
     public String toString() {
         return this.name;
     }
-
-    /* METHODS */
-    // public static List<Location> getAllLocations() {
-    //     return locations;
-    // }
 }
