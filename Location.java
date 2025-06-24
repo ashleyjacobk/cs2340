@@ -9,30 +9,23 @@ public class Location {
     private boolean status;
     private List<Vehicle> vehicles;
     private String id;
-    private Map<Location, Double> distances;  // Map of connected locations and their distances
-    // private static List<Location> locations = new ArrayList<>();
+    private double x, y; // coordinates
 
     /* CONSTRUCTERS */
-    public Location(String name, String id, int totalPassengers, boolean status) {
-        if (!id.matches("[a-zA-Z0-9]+")) {
-            throw new IllegalArgumentException("Location ID must be alphanumeric.");
-        }
-        if (id.length() > 100) {
-            throw new IllegalArgumentException("Location ID can not exceed 100 characters.");
-        }
+    public Location(String name, String id, int totalPassengers, boolean status, double x, double y) {
         this.name = name;
         this.id = id;
         this.totalPassengers = totalPassengers;
         this.status = status;
         this.vehicles = new ArrayList<>();
-        this.distances = new HashMap<>();
-        // locations.add(this);
+        this.x = x;
+        this.y = y;
     }
     public Location(String name, String id, int totalPassengers) {
-        this(name, id, totalPassengers, true);
+        this(name, id, totalPassengers, true, 0.0, 0.0);
     }
     public Location(String name, String id) {
-        this(name, id, 0, true);
+        this(name, id, 0, true, 0.0, 0.0);
     }
 
     /* GETTERS */
@@ -49,6 +42,12 @@ public class Location {
     public List<Vehicle> getVehicles() {
         return vehicles;
     }
+    public double getX() {
+        return x;
+    }
+    public double getY() {
+        return y;
+    }
     
     /* SETTERS */
     public void setName(String name) {
@@ -61,22 +60,14 @@ public class Location {
         this.status = status;
     }
 
-    public void setDistanceTo(Location other, double distance) {
-        if (distance < 0) {
-            throw new IllegalArgumentException("Distance cannot be negative");
-        }
-        distances.put(other, distance);
-        other.distances.put(this, distance);  // Make it bidirectional
+    /* METHODS */
+    
+    public double distanceTo(Location location) {
+        double dx = this.x - location.getX();
+        double dy = this.y - location.getY();
+        return Math.sqrt(dx * dx + dy * dy);
     }
-
-    public double getDistanceTo(Location other) {
-        Double distance = distances.get(other);
-        if (distance == null) {
-            throw new IllegalArgumentException("No distance defined between " + this.name + " and " + other.name);
-        }
-        return distance;
-    }
-
+    
     @Override
     public String toString() {
         return this.name;

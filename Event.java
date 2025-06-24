@@ -1,33 +1,9 @@
-public class Event implements Comparable<Event> {
-    private double time;
-    private String type;
-    private String description;
-
-    public Event(double time, String type, String description) {
-        this.time = time;
-        this.type = type;
-        this.description = description;
-    }
-
-    public double getTime() {
-        return time;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getDescription() {
-        return description;
-    }
+public interface Event extends Comparable<Event> {
+    int getTime();
+    void execute();
 
     @Override
-    public int compareTo(Event other) {
-        return Double.compare(this.time, other.time);
+    default int compareTo(Event other) {
+        return Integer.compare(this.getTime(), other.getTime());
     }
-
-    @Override
-    public String toString() {
-        return String.format("%.2f: %s - %s", time, type, description);
-    }
-} 
+}

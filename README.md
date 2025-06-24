@@ -20,21 +20,24 @@ This simulation system allows you to manage vehicles, locations, and routes in a
 
 2. The system will start a command-line interface with a prompt (`$>`). You can enter commands to interact with the simulation.
 
+---
 
 ## Features and Commands
 
-All commands use a comma-separated format. Below are the available commands and their descriptions:
+All commands use a comma-separated format. **Do not put spaces after commas.** Below are the available commands and their descriptions:
+
+---
 
 ### Vehicle Management
 
 1. **Create a vehicle**  
-   Create a vehicle with a unique ID, type, license plate, capacity, direction, route, and current location.  
+   Create a vehicle with a unique ID, type, capacity, route, current location, and speed.  
    ```
-   create_vehicle,capacity,type,id,direction,routeId,currentLocationId
+   create_vehicle,<capacity>,<type>,<id>,<routeId>,<currentLocationId>,<speed>
    ```
    Example:  
    ```
-   create_vehicle,50,Bus,V1,North,R1,L1
+   create_vehicle,50,Bus,V1,R1,L1,40
    ```
 
 2. **Display all vehicles**  
@@ -48,13 +51,13 @@ All commands use a comma-separated format. Below are the available commands and 
 ### Location Management
 
 1. **Create a location**  
-   Create a location where passengers can wait for vehicles.  
+   Create a location with a name and coordinates (x, y).  
    ```
-   create_location,id
+   create_location,<name>,<x>,<y>
    ```
    Example:  
    ```
-   create_location,L1
+   create_location,L1,0,0
    ```
 
 2. **Display all locations**  
@@ -70,7 +73,7 @@ All commands use a comma-separated format. Below are the available commands and 
 1. **Create a route**  
    Create an initially empty route to represent a sequence of locations.  
    ```
-   create_route,id
+   create_route,<id>
    ```
    Example:  
    ```
@@ -80,7 +83,7 @@ All commands use a comma-separated format. Below are the available commands and 
 2. **Add a location to a route**  
    Add a given location to an arbitrary position in a route.  
    ```
-   add_location_to_route,routeId,locationId,position
+   add_location_to_route,<routeId>,<locationId>,<position>
    ```
    Example:  
    ```
@@ -90,21 +93,27 @@ All commands use a comma-separated format. Below are the available commands and 
 3. **Remove a location from a route**  
    Remove a location from a given position in a route.  
    ```
-   remove_location_from_route,routeId,position
+   remove_location_from_route,<routeId>,<position>
    ```
    Example:  
    ```
    remove_location_from_route,R1,0
    ```
 
-4. **Display a route's locations**  
+4. **Display all locations in a route**  
    Display all locations contained in a route in a clear and consistent sequence.  
    ```
-   display_route,routeId
+   display_locations_in_route,<routeId>
    ```
    Example:  
    ```
-   display_route,R1
+   display_locations_in_route,R1
+   ```
+
+5. **Display all routes**  
+   Display all route IDs.  
+   ```
+   display_routes
    ```
 
 ---
@@ -114,7 +123,7 @@ All commands use a comma-separated format. Below are the available commands and 
 1. **Set a vehicle's position on a route**  
    Designate a vehicle's current position on a given route.  
    ```
-   set_vehicle_position,vehicleId,routeId,position
+   set_vehicle_position,<vehicleId>,<routeId>,<position>
    ```
    Example:  
    ```
@@ -124,7 +133,7 @@ All commands use a comma-separated format. Below are the available commands and 
 2. **Display vehicles at a specific location**  
    Display which vehicles are currently at a given location.  
    ```
-   display_vehicles_at_location,locationId
+   display_vehicles_at_location,<locationId>
    ```
    Example:  
    ```
@@ -134,7 +143,7 @@ All commands use a comma-separated format. Below are the available commands and 
 3. **Display vehicles assigned to a route**  
    Display which vehicles are assigned to a given route.  
    ```
-   display_vehicles_on_route,routeId
+   display_vehicles_on_route,<routeId>
    ```
    Example:  
    ```
@@ -143,16 +152,130 @@ All commands use a comma-separated format. Below are the available commands and 
 
 ---
 
+### Time and Event Management
+
+1. **Display current time**  
+   ```
+   display_time
+   ```
+
+2. **Advance time to a new value**  
+   ```
+   advance_time,<new_time>
+   ```
+   Example:  
+   ```
+   advance_time,10
+   ```
+
+3. **Set vehicle speed**  
+   ```
+   set_vehicle_speed,<vehicleId>,<speed_kph>
+   ```
+   Example:  
+   ```
+   set_vehicle_speed,V1,60
+   ```
+
+4. **Advance time to next event**  
+   ```
+   advance_time_to_next_event
+   ```
+
+5. **Display next event time**  
+   ```
+   display_next_event
+   ```
+
+6. **Display vehicle status**  
+   ```
+   display_vehicle_status,<vehicleId>
+   ```
+   Example:  
+   ```
+   display_vehicle_status,V1
+   ```
+
+---
+
 ### Other Commands
 
 - **Exit the simulation**  
-   Exit the program.  
    ```
    exit
    ```
 
 - **Help**  
-   Display a list of available commands.  
    ```
    help
    ```
+
+---
+
+## Notes
+
+- **IDs and names must be alphanumeric and not exceed 100 characters.**
+- **All referenced entities (routes, locations, vehicles) must exist before being used in commands.**
+- **Positions are zero-based.**
+
+---
+
+## Examples
+
+Below is an example session demonstrating typical usage:
+
+```
+$> create_location,L1,0,0
+INFO: Location created: L1 at (0.0,0.0)
+
+$> create_location,L2,10,10
+INFO: Location created: L2 at (10.0,10.0)
+
+$> create_route,R1
+INFO: Route created: R1
+
+$> add_location_to_route,R1,L1,0
+INFO: Location L1 added to route R1
+
+$> add_location_to_route,R1,L2,1
+INFO: Location L2 added to route R1
+
+$> create_vehicle,50,Bus,V1,R1,L1,40
+INFO: Vehicle created: V1
+INFO: Departure event scheduled for vehicle V1 at time 0
+
+$> display_vehicles
+V1
+
+$> display_locations
+L1
+L2
+
+$> display_routes
+R1
+
+$> display_locations_in_route,R1
+L1 L2 
+
+$> set_vehicle_position,V1,R1,1
+INFO: Vehicle V1 positioned on route R1
+
+$> display_vehicles_at_location,L2
+Bus V1 is at L2 on route R1
+
+$> display_vehicles_on_route,R1
+Bus V1 is at L2 on route R1
+
+$> display_time
+0.00
+
+$> advance_time,10
+INFO: Time is now 10
+
+$> help
+Available commands:
+create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, display_time, advance_time, set_vehicle_speed, advance_time_to_next_event, display_next_event, display_vehicle_status, exit
+
+$> exit
+exit acknowledged
+```

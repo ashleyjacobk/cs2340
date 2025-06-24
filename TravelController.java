@@ -5,9 +5,11 @@ public class TravelController {
     private Map<String, Vehicle> vehicles;
     private Map<String, Location> locations;
     private Map<String, Route> routes;
-    private static final Set<String> usedIds = new HashSet<>();
-    private double currentTime;
-    private PriorityQueue<Event> eventQueue;
+
+    // times -- phase 2
+    // private double time = 0.0;
+    private int time = 0;
+    private PriorityQueue<Event> eventQueue = new PriorityQueue<>();
 
     public TravelController() {
         this.vehicles = new TreeMap<>();
@@ -15,16 +17,6 @@ public class TravelController {
         this.routes = new TreeMap<>();
         this.currentTime = 0.0;
         this.eventQueue = new PriorityQueue<>();
-    }
-
-    private void checkAndRegisterId(String id) {
-        if (!usedIds.add(id)) {
-            throw new IllegalArgumentException("ID '" + id + "' is already used");
-        }
-    }
-
-    private void unregisterId(String id) {
-        usedIds.remove(id);
     }
 
     public void commandLoop() {
@@ -35,7 +27,7 @@ public class TravelController {
 
         while (true) {
             try {
-                System.out.print(" $> ");
+                System.out.print("$> ");
                 wholeInputLine = commandLineInput.nextLine();
                 tokens = wholeInputLine.split(DELIMITER);
 
@@ -46,18 +38,23 @@ public class TravelController {
                 switch (tokens[0]) {
                     case "create_vehicle":
                         if (tokens.length != 7) {
-                            throw new IllegalArgumentException("Correct usage for create_vehicle is: create_vehicle,<capacity>,<type>,<id>,<direction>,<route>,<currentLocationID>");
+                            throw new IllegalArgumentException("Correct usage for create_vehicle is: create_vehicle,<capacity>,<type>,<id>,<route>,<currentLocation>,<speed>");
                         }
-                        createVehicle(Integer.parseInt(tokens[1]), tokens[2], tokens[3], tokens[4], tokens[5], tokens[6]);
+                        tokens[1] = tokens[1].trim();
+                        tokens[6] = tokens[6].trim();
+                        
+                        createVehicle(Integer.parseInt(tokens[1]), tokens[2], tokens[3], tokens[4], tokens[5], Double.parseDouble(tokens[6]));
                         break;
                     case "display_vehicles":
                         displayVehicles();
                         break;
                     case "create_location":
-                        if (tokens.length != 3) {
-                            throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>,<id>");
+                        if (tokens.length != 5) {
+                            throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>,<id>,<x>,<y>");
                         }
-                        createLocation(tokens[1], tokens[2]);
+                        tokens[3] = tokens[3].trim();
+                        tokens[4] = tokens[4].trim();
+                        createLocation(tokens[1], tokens[2], Double.parseDouble(tokens[3]), Double.parseDouble(tokens[4])); // 2 and 3 are x and y respectively
                         break;
                     case "display_locations":
                         displayLocations();
@@ -72,12 +69,14 @@ public class TravelController {
                         if (tokens.length != 4) {
                             throw new IllegalArgumentException("Correct usage for add_location_to_route is: add_location_to_route,<routeId>,<locationId>,<position>");
                         }
+                        tokens[3] = tokens[3].trim();
                         addLocationToRoute(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
                         break;
                     case "remove_location_from_route":
                         if (tokens.length != 3) {
                             throw new IllegalArgumentException("Correct usage for remove_location_from_route is: remove_location_from_route,<routeId>,<position>");
                         }
+                        tokens[2] = tokens[2].trim();
                         removeLocationFromRoute(tokens[1], Integer.parseInt(tokens[2]));
                         break;
                     case "display_locations_in_route":
@@ -93,6 +92,7 @@ public class TravelController {
                         if (tokens.length != 4) {
                             throw new IllegalArgumentException("Correct usage for set_vehicle_position is: set_vehicle_position,<vehicleId>,<routeId>,<position>");
                         }
+                        tokens[3] = tokens[3].trim();
                         setVehiclePosition(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
                         break;
                     case "display_vehicles_at_location":
@@ -107,35 +107,41 @@ public class TravelController {
                         }
                         displayVehiclesOnRoute(tokens[1]);
                         break;
+                    case "display_time":
+                        System.out.printf("%.2f%n", (double) getTime());
+                        break;
                     case "advance_time":
                         if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for advance_time is: advance_time,<timeStep>");
+                            throw new IllegalArgumentException("Correct usage for advance_time is: advance_time,<time_to_advance>");
                         }
-                        advanceTime(Double.parseDouble(tokens[1]));
+                        tokens[1] = tokens[1].trim();
+                        advanceTime(Integer.parseInt(tokens[1]));
                         break;
                     case "jump_to_time":
                         if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for jump_to_time is: jump_to_time,<targetTime>");
+                            throw new IllegalArgumentException("Correct usage for jump_to_time is: jump_to_time,<new_time>");
                         }
-                        jumpToTime(Double.parseDouble(tokens[1]));
-                        break;
-                    case "get_current_time":
-                        System.out.println("Current time: " + getCurrentTime());
-                        break;
-                    case "get_next_event_time":
-                        System.out.println("Next event time: " + getNextEventTime());
+                        tokens[1] = tokens[1].trim();
+                        jumpToTime(Integer.parseInt(tokens[1]));
                         break;
                     case "set_vehicle_speed":
                         if (tokens.length != 3) {
-                            throw new IllegalArgumentException("Correct usage for set_vehicle_speed is: set_vehicle_speed,<vehicleId>,<speed>");
+                            throw new IllegalArgumentException("Correct usage for set_vehicle_speed is: set_vehicle_speed,<vehicleId>,<speed_kph>");
                         }
-                        setVehicleSpeed(tokens[1], Double.parseDouble(tokens[2]));
+                        tokens[2] = tokens[2].trim();
+                        setVehicleSpeed(tokens[1], Integer.parseInt(tokens[2]));
                         break;
-                    case "set_location_distance":
-                        if (tokens.length != 4) {
-                            throw new IllegalArgumentException("Correct usage for set_location_distance is: set_location_distance,<locationId1>,<locationId2>,<distance>");
+                    case "advance_time_to_next_event":
+                        advanceToNextEvent();
+                        break;
+                    case "display_next_event":
+                        displayNextEventTime();
+                        break;
+                    case "display_vehicle_status":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for display_vehicle_status is: display_vehicle_status,<vehicleId>");
                         }
-                        setLocationDistance(tokens[1], tokens[2], Double.parseDouble(tokens[3]));
+                        displayVehicleStatus(tokens[1]);
                         break;
                     case "exit":
                         System.out.println("exit acknowledged");
@@ -143,7 +149,7 @@ public class TravelController {
                         return;
                     case "help":
                         System.out.println("Available commands:");
-                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, advance_time, jump_to_time, get_current_time, get_next_event_time, set_vehicle_speed, set_location_distance, exit");
+                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, display_time, advance_time, jump_to_time, set_vehicle_speed, advance_time_to_next_event, display_next_event, display_vehicle_status, exit");
                         break;
                     default:
                         System.out.println("command " + tokens[0] + " NOT acknowledged");
@@ -153,84 +159,251 @@ public class TravelController {
             }
         }
     }
-
-    private void createVehicle(int capacity, String type, String id, String direction, String route, String currentLocation) {
-        if (vehicles.containsKey(id)) {
-            throw new IllegalArgumentException("Vehicle with ID '" + id + "' already exists");
-        }
-
-        if (!routes.containsKey(route)) {
-            throw new IllegalArgumentException("Route with ID '" + route + "' does not exist");
-        }
-
-        if (!locations.containsKey(currentLocation)) {
-            throw new IllegalArgumentException("Location with ID '" + currentLocation + "' does not exist");
-        }
-
-        Route routeObject = routes.get(route);
-        Location currentLocationObject = locations.get(currentLocation);
-        Vehicle vehicle = new Vehicle(capacity, type, id, direction, routeObject, currentLocationObject);
-        routeObject.add_vehicle(vehicle);
-        checkAndRegisterId(id);
-        vehicles.put(id, vehicle);
-        displayMessage("info", "Vehicle created: " + id);
+    
+    /**
+     * Helper method to validate ID format.
+     * 
+     * @param id
+     * @return true if the ID is valid, false otherwise.
+     */
+    private boolean validId(String id) { 
+        return id.matches("[A-Za-z0-9]+") && id.length() <= 100; 
     }
 
+    /**
+     * Checks if the ID is globally unique across vehicles, locations, and routes.
+     * 
+     * @param id
+     * @return true if the ID is globally unique, false otherwise.
+     */
+    private boolean isIdGloballyUnique(String id) {
+        return !vehicles.containsKey(id) && !locations.containsKey(id) && !routes.containsKey(id);
+    }
+
+    /**
+     * Creates a vehicle with the specified parameters.
+     * @throws IllegalArgumentException if the vehicle ID already exists, or if the route does not exist, or if the ID is invalid.
+     * @param capacity
+     * @param type
+     * @param id
+     * @param route
+     * @param currentLocation
+     * @param speed
+     */
+    private void createVehicle(int capacity, String type, String id, String route, String currentLocation, double speed) {
+        VehicleType vehicleType;
+        id = id.trim();
+        route = route.trim();
+        currentLocation = currentLocation.trim();
+        try {
+            type = type.trim().toUpperCase();
+            if (type.equals("U-BAHN")) {
+                type = "U_BAHN";
+            } else if (type.equals("S-BAHN")) {
+                type = "S_BAHN";
+            }
+            vehicleType = VehicleType.valueOf(type);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Vehicle type must be U-BAHN, S-BAHN, BUS, or TRAM");
+        }
+
+        if (vehicles.containsKey(id)) {
+            throw new IllegalArgumentException("Vehicle with ID " + id + " already exists");
+        }
+        if (!isIdGloballyUnique(id)) {
+            throw new IllegalArgumentException("ID " + id + " is not globally unique across vehicles, locations, and routes");
+        }
+        Route routeObject = routes.get(route);
+        if (routes.get(route) == null) {
+            throw new IllegalArgumentException("Route with ID " + route + " does not exist");
+        }
+        if (vehicleType.equals(routeObject.getVehicleType()) == false) {
+            throw new IllegalArgumentException("Vehicle type " + vehicleType + " does not match route type " + routeObject.getVehicleType());
+        }
+        Location currentLocationObject = locations.get(currentLocation);
+        if (currentLocationObject == null) {
+            throw new IllegalArgumentException("Current location with ID '" + currentLocation + "' does not exist");
+        }
+        if (!validId(id)) {
+            throw new IllegalArgumentException("Vehicle ID must be alphanumeric and not exceed 100 characters");
+        }
+
+        Vehicle vehicle = new Vehicle(capacity, vehicleType, id, routeObject, currentLocationObject, speed);
+        vehicles.put(id, vehicle);
+        routeObject.add_vehicle(vehicle);
+        displayMessage("info", "Vehicle created: " + id);
+
+        // Scheduling first departure event
+        DepartureEvent departureEvent = new DepartureEvent(time, vehicle, this);
+        addEvent(departureEvent);
+        displayMessage("info", "Departure event scheduled for vehicle " + id + " at time " + time);
+    }
+
+    /**
+     * Displays all vehicles in service.
+     */
     private void displayVehicles() {
         if (vehicles.isEmpty()) {
             displayMessage("info", "No vehicles in service");
             return;
         }
-        vehicles.keySet().forEach(System.out::println);
+        vehicles.values().forEach(System.out::println);
     }
 
-    private void createLocation(String name, String id) {
-        checkAndRegisterId(id);
-        if (locations.containsKey(id)) {
-            unregisterId(id);
-            throw new IllegalArgumentException("Location with id " + id + " already exists");
+    /**
+     * Creates a location with the specified name.
+     * @throws IllegalArgumentException if the location already exists or if the ID is not globally unique.
+     * @param name
+     * @param id usually an abbreviation of the name, but can be anything
+     * @param x
+     * @param y
+     */
+    private void createLocation(String name, String id, double x, double y) {
+        name = name.trim();
+        id = id.trim();
+
+        if (locations.containsKey(name)) {
+            throw new IllegalArgumentException("Location with name " + name + " already exists");
         }
-        locations.put(id, new Location(name, id));
-        displayMessage("info", "Location created: " + name + "(ID: " + id + ")");
+        if (!validId(id)) {
+            throw new IllegalArgumentException("Location ID must be alphanumeric and not exceed 100 characters");
+        }
+        if (!isIdGloballyUnique(id)) {
+            throw new IllegalArgumentException("ID " + id + " is not globally unique across vehicles, locations, and routes");
+        }
+        locations.put(id, new Location(name, id, 0, true, x, y));
+        displayMessage("info", "Location created: " + name + " at ("+x+","+y+")");
     }
 
+    /**
+     * Displays all locations.
+     */
     private void displayLocations() {
         if (locations.isEmpty()) {
             displayMessage("info", "No locations available");
             return;
         }
-        locations.keySet().forEach(System.out::println);
+        locations.values().forEach(location -> System.out.println(location.getName()));
     }
 
-    private void createRoute(String id, String vehicleType) {
-        checkAndRegisterId(id);
+    /**
+     * Creates a route with the specified ID.
+     * @throws IllegalArgumentException if the route ID already exists or is invalid, or if the ID is not globally unique.
+     * @param id
+     * @param type
+     */
+    private void createRoute(String id, String type) {
+        VehicleType vehicleType;
+        id = id.trim();
+        try {
+            type = type.trim().toUpperCase();
+            if (type.equals("U-BAHN")) {
+                type = "U_BAHN";
+            } else if (type.equals("S-BAHN")) {
+                type = "S_BAHN";
+            }
+            vehicleType = VehicleType.valueOf(type);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Vehicle type must be U-BAHN, S-BAHN, BUS, or TRAM");
+        }
+
+        if (routes.containsKey(id)) {
+            throw new IllegalArgumentException("Route with ID " + id + " already exists");
+        }
+        if (!isIdGloballyUnique(id)) {
+            throw new IllegalArgumentException("ID " + id + " is not globally unique across vehicles, locations, and routes");
+        }
+        if (!validId(id)) {
+            throw new IllegalArgumentException("Route ID must be alphanumeric and not exceed 100 characters");
+        }
         if (routes.containsKey(id)) {
             throw new IllegalArgumentException("Route with ID " + id + " already exists");
         }
         routes.put(id, new Route(id, vehicleType));
-        displayMessage("info", "Route for vehicle type " + vehicleType + " created (ID : " + id + ")");
+        displayMessage("info", "Route created: " + id);
     }
 
+    /**
+     * Adds a location to a route at a specified position.
+     * @throws IllegalArgumentException if the route or location does not exist, or if the position is invalid.
+     * @param routeId
+     * @param locationId
+     * @param position
+     */
     private void addLocationToRoute(String routeId, String locationId, int position) {
+        routeId = routeId.trim();
+        locationId = locationId.trim();
+
         Route route = routes.get(routeId);
         Location location = locations.get(locationId);
         if (route == null || location == null) {
             throw new IllegalArgumentException("Invalid route or location ID");
         }
-        route.addLocation(location, position);
-        displayMessage("info", "Location " + locationId + " added to route " + routeId);
+        if (route.getLocations().contains(location)) {
+            displayMessage("error", "Location " + location.getName() + " already exists in route " + routeId);
+            return;
+        }
+        boolean added = route.addLocation(location, position);
+        if (added) {
+            displayMessage("info", "Location " + location.getName() + " added to route " + routeId + " at position " + position);
+        } else {
+            throw new IllegalArgumentException("Invalid position for route " + routeId);
+        }
+        // route.addLocation(location, position);
+        // displayMessage("info", "Location " + location.getName() + " added to route " + routeId);
     }
 
+    /**
+     * Removes a location from a route at a specified position.
+     * @throws IllegalArgumentException if the route does not exist or if the position is invalid.
+     * @param routeId
+     * @param position
+     */
     private void removeLocationFromRoute(String routeId, int position) {
+        routeId = routeId.trim();
         Route route = routes.get(routeId);
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");
         }
+        if (position < 0 || position >= route.getLocations().size()) {
+            throw new IllegalArgumentException("Invalid position for route " + routeId);
+        }
+        Location location = route.getLocations().get(position);
+        // find vehicles at this location and store in an arraylist
+        List<Vehicle> vehiclesAtLocation = new ArrayList<>();
+        for (Vehicle vehicle : vehicles.values()) {
+            if (vehicle.getRoute() == route && vehicle.getCurrentLocation() == location) {
+                vehiclesAtLocation.add(vehicle);
+            }
+        }
+        // remove location from route
         route.removeLocation(position);
         displayMessage("info", "Location removed from route " + routeId);
+        // if there are vehicles at this location, set their current position to the next location in the route
+        for (Vehicle vehicle : vehiclesAtLocation) {
+            if (route.getLocations().isEmpty()) {
+                vehicle.setCurrentPosition(0); // if no locations left, reset to first position
+                displayMessage("info", "Vehicle " + vehicle.getId() + " is on the empty route " + routeId + " and has been stopped.");
+                continue;
+            }
+            int nextPosition = position;
+            if (nextPosition >= route.getLocations().size()) {
+                nextPosition = 0; // wrap around to the first location if at the end
+            }
+            displayMessage("info", "Vehicle " + vehicle.getId() + " repositioned to " + route.getLocations().get(nextPosition).getName());
+            vehicle.setCurrentPosition(nextPosition);
+            Location nextLocation = vehicle.getNextLocation();
+            displayMessage("info", "Vehicle " + vehicle.getId() + " will now travel to " + (nextLocation != null ? nextLocation.getName() : "no next location"));
+        }
     }
 
+    /**
+     * Displays all locations in a route.
+     * @param routeId
+     */
     private void displayLocationsInRoute(String routeId) {
+        routeId = routeId.trim();
+
         Route route = routes.get(routeId);
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");
@@ -238,6 +411,9 @@ public class TravelController {
         route.display_route();
     }
 
+    /**
+     * Displays all routes.
+     */
     private void displayRoutes() {
         if (routes.isEmpty()) {
             displayMessage("info", "No routes available");
@@ -246,18 +422,39 @@ public class TravelController {
         routes.keySet().forEach(System.out::println);
     }
 
+    /**
+     * Sets the position of a vehicle on a specified route.
+     * @throws IllegalArgumentException if the vehicle or route does not exist.
+     * @param vehicleId
+     * @param routeId
+     * @param position
+     */
     private void setVehiclePosition(String vehicleId, String routeId, int position) {
+        vehicleId = vehicleId.trim();
+        routeId = routeId.trim();
+
         Vehicle vehicle = vehicles.get(vehicleId);
         Route route = routes.get(routeId);
         if (vehicle == null || route == null) {
             throw new IllegalArgumentException("Invalid vehicle or route ID");
+        }
+        // check to make sure the position is valid and exists
+        if (position < 0 || position >= route.getLocations().size()) {
+            throw new IllegalArgumentException("Invalid position for route " + routeId);
         }
         vehicle.setCurrentRoute(route);
         vehicle.setCurrentPosition(position);
         displayMessage("info", "Vehicle " + vehicleId + " positioned on route " + routeId);
     }
 
+    /**
+     * Displays all vehicles at a specified location.
+     * @throws IllegalArgumentException if the location does not exist.
+     * @param locationId
+     */
     private void displayVehiclesAtLocation(String locationId) {
+        locationId = locationId.trim();
+
         Location location = locations.get(locationId);
         if (location == null) {
             throw new IllegalArgumentException("Invalid location ID");
@@ -273,7 +470,14 @@ public class TravelController {
         }
     }
 
+    /**
+     * Displays all vehicles assigned to a specified route.
+     * @throws IllegalArgumentException if the route does not exist.
+     * @param routeId
+     */
     private void displayVehiclesOnRoute(String routeId) {
+        routeId = routeId.trim();
+
         Route route = routes.get(routeId);
         if (route == null) {
             throw new IllegalArgumentException("Invalid route ID");
@@ -288,104 +492,103 @@ public class TravelController {
         }
     }
 
-    public void advanceTime(double timeStep) {
-        if (timeStep <= 0) {
-            throw new IllegalArgumentException("Time step must be positive");
-        }
-        double targetTime = currentTime + timeStep;
-        processEventsUntil(targetTime);
-        currentTime = targetTime;
-    }
-
-    public void jumpToTime(double targetTime) {
-        if (targetTime < currentTime) {
-            throw new IllegalArgumentException("Cannot jump to a time in the past");
-        }
-        processEventsUntil(targetTime);
-        currentTime = targetTime;
-    }
-
-    private void processEventsUntil(double targetTime) {
-        while (!eventQueue.isEmpty() && eventQueue.peek().getTime() <= targetTime) {
-            Event event = eventQueue.poll();
-            currentTime = event.getTime();
-            handleEvent(event);
-        }
-    }
-
-    private void handleEvent(Event event) {
-        switch (event.getType()) {
-            case "VEHICLE_ARRIVAL":
-                handleVehicleArrival(event);
-                break;
-            case "VEHICLE_DEPARTURE":
-                handleVehicleDeparture(event);
-                break;
-            default:
-                displayMessage("warning", "Unknown event type: " + event.getType());
-        }
-    }
-
-    private void handleVehicleArrival(Event event) {
-        String vehicleId = event.getDescription();
+    /**
+     * Sets the speed of a vehicle.
+     * @throws IllegalArgumentException if vehicleID doesn't exist or speed is <= 0
+     * @param vehicleId 
+     * @param speed
+     */
+    private void setVehicleSpeed(String vehicleId, int speed) {
+        vehicleId = vehicleId.trim();
         Vehicle vehicle = vehicles.get(vehicleId);
-        if (vehicle != null) {
-            vehicle.updateState(currentTime);
-            // Schedule departure event
-            scheduleEvent(new Event(currentTime + 5.0, "VEHICLE_DEPARTURE", vehicleId));
+        
+        if (vehicle == null) {
+            throw new IllegalArgumentException("Vehicle with ID " + vehicleId + " does not exist");
         }
+        if (speed <= 0) {
+            throw new IllegalArgumentException("Speed must be greater than zero.");
+        }
+        vehicle.setSpeed(speed);
+        displayMessage("info", "Vehicle " + vehicleId + " speed set to " + speed + " kph");
     }
 
-    private void handleVehicleDeparture(Event event) {
-        String vehicleId = event.getDescription();
-        Vehicle vehicle = vehicles.get(vehicleId);
-        if (vehicle != null) {
-            vehicle.updateState(currentTime);
-            // Schedule next arrival event if vehicle is moving
-            if (!vehicle.isAtLocation()) {
-                scheduleEvent(new Event(vehicle.getArrivalTime(), "VEHICLE_ARRIVAL", vehicleId));
-            }
+    /**
+     * Computes the travel time of the vehicle's distance in minutes
+     * @param distance
+     * @param speed
+     * @return the travel time in minutes
+     */
+    public int computeTravelMinutes(double distance, double speed) {
+        if (speed <= 0) {
+            throw new IllegalArgumentException("Speed must be greater than zero.");
         }
+        double hours = distance / speed;
+        int minutes = (int) (hours * 60);
+        return Math.max(minutes, 1); // to make sure theres at least 1 minute of travel time
     }
 
-    public void scheduleEvent(Event event) {
+    public void addEvent(Event event) {
         eventQueue.add(event);
     }
 
-    public double getCurrentTime() {
-        return currentTime;
+    public void advanceToNextEvent() {
+        if (eventQueue.isEmpty()) {
+            displayMessage("error", "No scheduled events");
+            return;
+        }
+        Event nextEvent = eventQueue.poll();
+        time = Math.max(time, nextEvent.getTime());
+        nextEvent.execute();
+        displayMessage("info", "Advanced to time: " + time + " and executed " + nextEvent);
     }
 
-    public double getNextEventTime() {
-        return eventQueue.isEmpty() ? Double.POSITIVE_INFINITY : eventQueue.peek().getTime();
+    public void jumpToTime(int newTime) {
+        if (newTime <= time) {
+            displayMessage("error", "Cannot go backwards in time.");
+            return;
+        }
+
+        displayMessage("info", "Jumping time from " + time + " to " + newTime);
+        while (!eventQueue.isEmpty() && eventQueue.peek().getTime() <= newTime) {
+            advanceToNextEvent();
+        }
+
+        time = newTime;
+        displayMessage("info", "Time is now " + time);
     }
 
-    public void setVehicleSpeed(String vehicleId, double speed) {
+    public void advanceTime(int minutes) {
+        if (minutes <= 0) {
+            throw new IllegalArgumentException("Time to advance must be greater than zero.");
+        }
+        int newTime = time + minutes;
+        displayMessage("info", "Advancing time from " + time + " to " + newTime);
+        jumpToTime(newTime);
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public void displayNextEventTime() {
+        if (eventQueue.isEmpty()) {
+            displayMessage("info", "No scheduled events.");
+            return;
+        }
+        Event nextEvent = eventQueue.peek();
+        displayMessage("info", "Next event is scheduled at time: " + nextEvent.getTime());
+    }
+
+    private void displayVehicleStatus(String vehicleId) {
+        vehicleId = vehicleId.trim();
         Vehicle vehicle = vehicles.get(vehicleId);
         if (vehicle == null) {
-            throw new IllegalArgumentException("Invalid vehicle ID");
+            throw new IllegalArgumentException("Vehicle with ID " + vehicleId + " does not exist");
         }
-        vehicle.setSpeed(speed);
-        // Schedule next arrival event if vehicle is moving
-        if (!vehicle.isAtLocation()) {
-            scheduleEvent(new Event(vehicle.getArrivalTime(), "VEHICLE_ARRIVAL", vehicleId));
-        }
-    }
-
-    public void setLocationDistance(String locationId1, String locationId2, double distance) {
-        Location loc1 = locations.get(locationId1);
-        Location loc2 = locations.get(locationId2);
-        if (loc1 == null || loc2 == null) {
-            throw new IllegalArgumentException("Invalid location ID");
-        }
-        loc1.setDistanceTo(loc2, distance);
-        // Update arrival times for vehicles traveling between these locations
-        for (Vehicle vehicle : vehicles.values()) {
-            if (!vehicle.isAtLocation() && 
-                (vehicle.getCurrentLocation() == loc1 || vehicle.getCurrentLocation() == loc2) &&
-                (vehicle.getNextLocation() == loc1 || vehicle.getNextLocation() == loc2)) {
-                scheduleEvent(new Event(vehicle.getArrivalTime(), "VEHICLE_ARRIVAL", vehicle.getId()));
-            }
+        if (vehicle.isInTransit()) {
+            displayMessage("info", "Vehicle " + vehicleId + " is in transit.");
+        } else {
+            displayMessage("info", "Vehicle " + vehicleId + " is at location " + vehicle.getCurrentLocation().getName() + ".");
         }
     }
 

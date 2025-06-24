@@ -7,96 +7,67 @@ import java.util.List;
  * @version 1.0
  */
 public class Vehicle {
-
-    /**
-     * Creates
-     */
     private static ArrayList<Vehicle> totalVehicles = new ArrayList<>();
-    // private Random random = new Random();
 
     private int currentCapacity;
     private int totalCapacity;
-    private String type;
-    private String id;
-    private String direction;
+    private VehicleType type;
+    private final String ID; // should be final since id shouldnt be changed
     private boolean status;
     private boolean movement;
     private Route route;
     private Location currentLocation;
-    private Location nextLocation;
-    private double speed;  // Speed in units per time
-    private double arrivalTime;  // Time when vehicle will arrive at next location
-    private boolean isAtLocation;  // Whether vehicle is at a location or between locations
+    //private Location nextLocation;
+    private double speed; // in kph
+    private boolean inTransit = false;
 
-    public Vehicle(int capacity, String type, String id, String direction, Route route, Location currentLocation) {
-        if (!id.matches("[a-zA-Z0-9]+")) {
-            throw new IllegalArgumentException("Vehicle ID must be alphanumeric.");
-        }
-        if (id.length() > 100) {
-            throw new IllegalArgumentException("Vehicle ID can not exceed 100 characters.");
-        }
+    public Vehicle(int capacity, VehicleType type, String id, Route route, Location currentLocation, double speed) {
         this.currentCapacity = 0;
         this.totalCapacity = capacity;
         this.type = type;
-        this.id = id;
-        this.direction = direction;
+        this.ID = id;
         this.status = true;
         this.movement = false;
         this.route = route;
         this.currentLocation = currentLocation;
-        this.nextLocation = calculateNextLocation();
-        this.speed = 0.0;
-        this.arrivalTime = Double.POSITIVE_INFINITY;
-        this.isAtLocation = true;
+        //this.nextLocation = getNextLocationFromRoute();
+        this.speed = speed;
+        this.inTransit = false;
 
         totalVehicles.add(this);
     }
 
-    private Location calculateNextLocation() {
-        if (route == null || currentLocation == null) {
+    public Location getNextLocation() {
+        if (route == null) {
             return null;
         }
         
         List<Location> routeLocations = route.getLocations();
+        if (routeLocations.isEmpty()) {
+            return null;
+        }
         int currentIndex = routeLocations.indexOf(currentLocation);
         
         if (currentIndex == -1) {
-            return null;
+            return routeLocations.get(0); // current location not found in the route
         }
-        
-        // Find the destination location
-        Location destination = null;
-        for (Location loc : routeLocations) {
-            if (loc.getName().equals(direction)) {
-                destination = loc;
-                break;
-            }
+        if (currentIndex == routeLocations.size() - 1) {
+            return routeLocations.get(0); // if at last location, return to first location
+        } else {
+            return routeLocations.get(currentIndex + 1); // return next location in the route
         }
-        
-        if (destination == null) {
-            return null;
-        }
-        
-        int destIndex = routeLocations.indexOf(destination);
-        if (currentIndex < destIndex) {
-            return routeLocations.get(currentIndex + 1);
-        } else if (currentIndex > destIndex) {
-            return routeLocations.get(currentIndex - 1);
-        }
-        
-        return null;
     }
 
-    public String getType() {
+    public boolean isInTransit() {
+        return inTransit;
+    }
+
+    public VehicleType getType() {
         return type;
     }
 
     public String getId() {
-        return id;
-    }
-
-    public String getDirection() {
-        return direction;
+        return ID;
     }
 
     public static ArrayList<Vehicle> getTotalVehicles() {
@@ -113,7 +84,7 @@ public class Vehicle {
 
     public void setCurrentPosition(int position) {
         if (route != null && position >= 0 && position < route.getLocations().size()) {
-            this.currentLocation = route.getLocations().get(position);
+            arriveAt(route.getLocations().get(position));
         }
     }
 
@@ -121,56 +92,29 @@ public class Vehicle {
         return currentLocation;
     }
 
-    public Location getNextLocation() {
-        return nextLocation;
-    }
-
-    public void setSpeed(double speed) {
-        if (speed < 0) {
-            throw new IllegalArgumentException("Speed cannot be negative");
-        }
-        this.speed = speed;
-        updateArrivalTime();
-    }
-
     public double getSpeed() {
         return speed;
     }
 
-    public double getArrivalTime() {
-        return arrivalTime;
-    }
-
-    public boolean isAtLocation() {
-        return isAtLocation;
-    }
-
-    private void updateArrivalTime() {
-        if (nextLocation == null || speed == 0) {
-            arrivalTime = Double.POSITIVE_INFINITY;
-            return;
+    public void setSpeed(double speed) {
+        if (speed > 0) {
+            this.speed = speed;
         }
-        double distance = currentLocation.getDistanceTo(nextLocation);
-        arrivalTime = distance / speed;
     }
 
-    public void updateState(double currentTime) {
-        if (!isAtLocation && currentTime >= arrivalTime) {
-            // Vehicle has arrived at next location
-            currentLocation = nextLocation;
-            nextLocation = calculateNextLocation();
-            isAtLocation = true;
-            updateArrivalTime();
-        }
+    public void setInTransit() {
+        this.inTransit = true;
+        this.currentLocation = null; // Clear current location when in transit
+    }
+
+    public void arriveAt(Location location) {
+        this.inTransit = false;
+        this.currentLocation = location;
     }
 
     @Override
     public String toString() {
-        if (isAtLocation) {
-            return this.type + " " + this.id + " is at " + this.currentLocation + " on route " + getRoute().toString();
-        } else {
-            return this.type + " " + this.id + " is traveling from " + this.currentLocation + " to " + this.nextLocation + 
-                   " on route " + getRoute().toString() + " (arriving at " + String.format("%.2f", arrivalTime) + ")";
-        }
+        String locationStr = (currentLocation != null) ? currentLocation.getName() : "in transit";
+        return this.type + " " + this.ID + " is at " + locationStr + " on route " + getRoute().toString();
     }
 }
