@@ -222,6 +222,9 @@ public class TravelController {
         if (currentLocationObject == null) {
             throw new IllegalArgumentException("Current location with ID '" + currentLocation + "' does not exist");
         }
+        if (routeObject.getLocations().contains(currentLocationObject) == false) {
+            throw new IllegalArgumentException("Current location " + currentLocation + " is not part of the route " + route);
+        }
         if (!validId(id)) {
             throw new IllegalArgumentException("Vehicle ID must be alphanumeric and not exceed 100 characters");
         }
@@ -344,6 +347,14 @@ public class TravelController {
         boolean added = route.addLocation(location, position);
         if (added) {
             displayMessage("info", "Location " + location.getName() + " added to route " + routeId + " at position " + position);
+            // this will also update the vehicles on this route
+            for (Vehicle vehicle : route.getVehicles()) {
+                if (vehicle.getCurrentLocation() == null) {
+                    vehicle.setCurrentPosition(position);
+                    displayMessage("info", "Vehicle " + vehicle.getId() + " is now positioned at " + location.getName() + " on route " + routeId);
+                }
+                vehicle.setCurrentPosition(position);
+            }
         } else {
             throw new IllegalArgumentException("Invalid position for route " + routeId);
         }
@@ -381,7 +392,7 @@ public class TravelController {
         for (Vehicle vehicle : vehiclesAtLocation) {
             if (route.getLocations().isEmpty()) {
                 vehicle.arriveAt(null); // if no locations left, make vehicle arrive at null
-                displayMessage("info", "Vehicle " + vehicle.getId() + " is on the empty route " + routeId + " and has been stopped.");
+                displayMessage("info", "Vehicle " + vehicle.getId() + " is in transit on the empty route " + routeId + ".");
                 continue;
             }
             int nextPosition = position;
