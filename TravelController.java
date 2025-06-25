@@ -366,9 +366,23 @@ public class TravelController {
             displayMessage("error", "Location " + location.getName() + " already exists in route " + routeId);
             return;
         }
+        int oldSize = route.getLocations().size();
         boolean added = route.addLocation(location, position);
         if (added) {
             displayMessage("info", "Location " + location.getName() + " added to route " + routeId + " at position " + position);
+
+            // If this route previously had only one stop, schedule departures for vehicles currently at that stop
+            if (oldSize == 1 && route.getLocations().size() == 2) {
+                for (Vehicle vehicle : route.getVehicles()) {
+                    if (!vehicle.isInTransit() && vehicle.getCurrentLocation() != null) {
+                        // ensure the vehicle is actually on this route at a location (not null)
+                        DepartureEvent dep = new DepartureEvent(time, vehicle, this);
+                        addEvent(dep);
+                        displayMessage("info", "Departure event scheduled for vehicle " + vehicle.getId() + " at time " + time + " due to second location addition");
+                    }
+                }
+            }
+
             // this will also update the vehicles on this route
             for (Vehicle vehicle : route.getVehicles()) {
                 if (vehicle.getCurrentLocation() == null) {
