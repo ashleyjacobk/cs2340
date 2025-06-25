@@ -613,7 +613,6 @@ public class TravelController {
             throw new IllegalArgumentException("Time to advance must be greater than zero.");
         }
         int newTime = time + minutes;
-        displayMessage("info", "Advancing time from " + time + " to " + newTime);
         jumpToTime(newTime);
     }
 
