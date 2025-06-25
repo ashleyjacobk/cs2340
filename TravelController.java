@@ -595,13 +595,10 @@ public class TravelController {
             return;
         }
 
-        int nextTime = eventQueue.peek().getTime();
-        while (!eventQueue.isEmpty() && eventQueue.peek().getTime() == nextTime) {
-            Event e = eventQueue.poll();
-            time = Math.max(time, e.getTime());
-            e.execute();
-            displayMessage("info", "Advanced to time: " + time + " and executed " + e);
-        }
+        Event e = eventQueue.poll();
+        time = Math.max(time, e.getTime());
+        e.execute();
+        displayMessage("info", "Advanced to time: " + time + " and executed " + e);
     }
 
     public void jumpToTime(int newTime) {
