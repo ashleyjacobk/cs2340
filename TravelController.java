@@ -140,13 +140,6 @@ public class TravelController {
                         tokens[1] = tokens[1].trim();
                         jumpToTime(Integer.parseInt(tokens[1]));
                         break;
-                    case "set_vehicle_speed":
-                        if (tokens.length != 3) {
-                            throw new IllegalArgumentException("Correct usage for set_vehicle_speed is: set_vehicle_speed,<vehicleId>,<speed_kph>");
-                        }
-                        tokens[2] = tokens[2].trim();
-                        setVehicleSpeed(tokens[1], Integer.parseInt(tokens[2]));
-                        break;
                     case "advance_time_to_next_event":
                         advanceToNextEvent();
                         break;
@@ -165,7 +158,7 @@ public class TravelController {
                         return;
                     case "help":
                         System.out.println("Available commands:");
-                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, display_time, advance_time, jump_to_time, set_vehicle_speed, advance_time_to_next_event, display_next_event, display_vehicle_status, exit");
+                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, display_time, advance_time, jump_to_time, advance_time_to_next_event, display_next_event, display_vehicle_status, exit");
                         break;
                     default:
                         System.out.println("command " + tokens[0] + " NOT acknowledged");
@@ -548,26 +541,6 @@ public class TravelController {
                 System.out.println(vehicle);
             }
         }
-    }
-
-    /**
-     * Sets the speed of a vehicle.
-     * @throws IllegalArgumentException if vehicleID doesn't exist or speed is <= 0
-     * @param vehicleId 
-     * @param speed
-     */
-    private void setVehicleSpeed(String vehicleId, int speed) {
-        vehicleId = vehicleId.trim();
-        Vehicle vehicle = vehicles.get(vehicleId);
-        
-        if (vehicle == null) {
-            throw new IllegalArgumentException("Vehicle with ID " + vehicleId + " does not exist");
-        }
-        if (speed <= 0) {
-            throw new IllegalArgumentException("Speed must be greater than zero.");
-        }
-        vehicle.setSpeed(speed);
-        displayMessage("info", "Vehicle " + vehicleId + " speed set to " + speed + " kph");
     }
 
     /**
