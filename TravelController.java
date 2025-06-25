@@ -619,8 +619,13 @@ public class TravelController {
             displayMessage("info", "No scheduled events.");
             return;
         }
-        Event nextEvent = eventQueue.peek();
-        displayMessage("info", "Next event: " + nextEvent.toString());
+        int nextTime = eventQueue.peek().getTime();
+
+        for (Event ev : eventQueue) {
+            if (ev.getTime() == nextTime) {
+                displayMessage("info", "Next event: " + ev.toString());
+            }
+        }
     }
 
     private void displayVehicleStatus(String vehicleId) {
