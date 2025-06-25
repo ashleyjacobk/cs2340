@@ -105,6 +105,24 @@ public class TravelController {
                         }
                         displayVehiclesOnRoute(tokens[1]);
                         break;
+                    case "displayAllRoutes":
+                        if (tokens.length != 1) {
+                            throw new IllegalArgumentException("Usage: displayAllRoutes");
+                        }
+                        displayAllRoutes();
+                        break;
+                    case "displayAllVehicles":
+                        if (tokens.length != 1) {
+                            throw new IllegalArgumentException("Usage: displayAllVehicles");
+                        }
+                        displayAllVehicles();
+                        break;
+                    case "displayCurrentTime":
+                        if (tokens.length != 1) {
+                            throw new IllegalArgumentException("Usage: displayCurrentTime");
+                        }
+                        displayCurrentTime();
+                        break;
                     case "display_time":
                         System.out.println(getTime());
                         break;
@@ -643,5 +661,22 @@ public class TravelController {
 
     void displayMessage(String status, String text_output) {
         System.out.println(status.toUpperCase() + ": " + text_output);
+    }
+
+    /*
+     * Convenience helper methods (lifted from Version 1) to expose quick, public
+     * views of the simulator state. 
+     */
+
+    public void displayAllRoutes() {
+        displayRoutes();
+    }
+
+    public void displayAllVehicles() {
+        displayVehicles();
+    }
+
+    public void displayCurrentTime() {
+        System.out.println(getTime());
     }
 }
