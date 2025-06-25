@@ -106,7 +106,7 @@ public class TravelController {
                         displayVehiclesOnRoute(tokens[1]);
                         break;
                     case "display_time":
-                        System.out.printf("%.2f%n", (double) getTime());
+                        System.out.println(getTime());
                         break;
                     case "advance_time":
                         if (tokens.length != 2) {
