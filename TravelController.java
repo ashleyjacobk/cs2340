@@ -590,7 +590,7 @@ public class TravelController {
         Event e = eventQueue.poll();
         time = Math.max(time, e.getTime());
         e.execute();
-        displayMessage("info", "Advanced to time: " + time + " and executed " + e);
+        displayMessage("info", "Advanced to time: " + time);
     }
 
     public void jumpToTime(int newTime) {
