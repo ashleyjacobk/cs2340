@@ -17,7 +17,6 @@ public class Vehicle {
     private boolean movement;
     private Route route;
     private Location currentLocation;
-    //private Location nextLocation;
     private double speed; // in kph
     private boolean inTransit = false;
 
@@ -30,7 +29,6 @@ public class Vehicle {
         this.movement = false;
         this.route = route;
         this.currentLocation = currentLocation;
-        //this.nextLocation = getNextLocationFromRoute();
         this.speed = speed;
         this.inTransit = false;
 
