@@ -380,7 +380,7 @@ public class TravelController {
         // if there are vehicles at this location, set their current position to the next location in the route
         for (Vehicle vehicle : vehiclesAtLocation) {
             if (route.getLocations().isEmpty()) {
-                vehicle.setCurrentPosition(0); // if no locations left, reset to first position
+                vehicle.arriveAt(null); // if no locations left, make vehicle arrive at null
                 displayMessage("info", "Vehicle " + vehicle.getId() + " is on the empty route " + routeId + " and has been stopped.");
                 continue;
             }
