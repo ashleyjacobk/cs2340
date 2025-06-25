@@ -281,13 +281,6 @@ public class TravelController {
         if (locations.containsKey(id)) {
             throw new IllegalArgumentException("Location with ID " + id + " already exists");
         }
-        // check for duplicate coordinates
-        for (Location existing : locations.values()) {
-            if (Double.compare(existing.getX(), x) == 0 && Double.compare(existing.getY(), y) == 0) {
-                throw new IllegalArgumentException("Another location already exists at coordinates (" + x + "," + y + ")");
-            }
-        }
-
         if (!validId(id)) {
             throw new IllegalArgumentException("Location ID must be alphanumeric and not exceed 100 characters");
         }
@@ -366,6 +359,18 @@ public class TravelController {
             displayMessage("error", "Location " + location.getName() + " already exists in route " + routeId);
             return;
         }
+        
+        double x = location.getX();
+        double y = location.getY();
+
+        // check for duplicate coordinates
+        for (Location existing : route.getLocations()) {
+            if (Double.compare(existing.getX(), x) == 0 && Double.compare(existing.getY(), y) == 0) {
+                throw new IllegalArgumentException("Another location in the route already exists at coordinates (" + x + "," + y + ")");
+            }
+        }
+
+
         int oldSize = route.getLocations().size();
         boolean added = route.addLocation(location, position);
         if (added) {
@@ -585,7 +590,7 @@ public class TravelController {
         Event e = eventQueue.poll();
         time = Math.max(time, e.getTime());
         e.execute();
-        displayMessage("info", "Advanced to time: " + time + " and executed " + e);
+        displayMessage("info", "Advanced to time: " + time);
     }
 
     public void jumpToTime(int newTime) {
