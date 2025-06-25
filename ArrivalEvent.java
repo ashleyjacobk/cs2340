@@ -27,10 +27,10 @@ public class ArrivalEvent implements Event {
 
     @Override
     public String toString() {
-        return "ArrivalEvent{" +
-                "time=" + time +
-                ", vehicle=" + vehicle.getId() +
-                ", destination=" + destination.getName() +
-                '}';
+        return String.format("Time %d: ARRIVAL of vehicle %s at %s", time, vehicle.getId(), destination.getName());
+    }
+
+    public Location getDestination() {
+        return destination;
     }
 }

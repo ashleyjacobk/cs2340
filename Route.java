@@ -24,19 +24,26 @@ public class Route {
         }
     }
 
-    public void add_vehicle(Vehicle newVehicle) {
+    public boolean add_vehicle(Vehicle newVehicle) {
         if (!vehicleType.equals(newVehicle.getType())) {
             throw new IllegalArgumentException("You can only add vehicles of type " + vehicleType + " to this route.");
         }
+        // Prevent duplicates (by object reference or by ID)
+        for (Vehicle v : vehicles) {
+            if (v.getId().equals(newVehicle.getId())) {
+                return false; // already present
+            }
+        }
         vehicles.add(newVehicle);
+        return true;
     }
 
-    public void removeLocation(int position) {
-        if (position <= locations.size() && position >= 0) {
-            locations.remove(position);
-        } else {
+    public Location removeLocation(int position) {
+        if (position < 0 || position >= locations.size()) {
             System.out.println("This position is not in the route");
+            return null;
         }
+        return locations.remove(position);
     }
 
     public void display_route() {

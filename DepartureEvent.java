@@ -19,6 +19,11 @@ public class DepartureEvent implements Event {
         Location currentLocation = vehicle.getCurrentLocation();
         Location nextLocation = vehicle.getNextLocation();
 
+        if (currentLocation == null) {
+            controller.displayMessage("error", "Vehicle " + vehicle.getId() + " has no current location set; cannot depart.");
+            return;
+        }
+
         if (nextLocation == null) {
             controller.displayMessage("info", "Vehicle " + vehicle.getId() + " has no next location to depart to.");
             return;
@@ -43,10 +48,7 @@ public class DepartureEvent implements Event {
 
     @Override
     public String toString() {
-        return "DepartureEvent{" +
-                "time=" + time +
-                ", vehicle=" + vehicle.getId() +
-                ", nextLocation=" + (vehicle.getNextLocation() != null ? vehicle.getNextLocation().getName() : "None") +
-                '}';
+        String nextLocName = (vehicle.getNextLocation() != null) ? vehicle.getNextLocation().getName() : "None";
+        return String.format("Time %d: DEPARTURE of vehicle %s to %s", time, vehicle.getId(), nextLocName);
     }
 }

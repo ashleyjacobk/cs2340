@@ -229,6 +229,10 @@ public class TravelController {
             throw new IllegalArgumentException("Vehicle ID must be alphanumeric and not exceed 100 characters");
         }
 
+        if (speed <= 0) {
+            throw new IllegalArgumentException("Speed must be greater than zero.");
+        }
+
         Vehicle vehicle = new Vehicle(capacity, vehicleType, id, routeObject, currentLocationObject, speed);
         vehicles.put(id, vehicle);
         routeObject.add_vehicle(vehicle);
@@ -263,9 +267,16 @@ public class TravelController {
         name = name.trim();
         id = id.trim();
 
-        if (locations.containsKey(name)) {
-            throw new IllegalArgumentException("Location with name " + name + " already exists");
+        if (locations.containsKey(id)) {
+            throw new IllegalArgumentException("Location with ID " + id + " already exists");
         }
+        // check for duplicate coordinates
+        for (Location existing : locations.values()) {
+            if (Double.compare(existing.getX(), x) == 0 && Double.compare(existing.getY(), y) == 0) {
+                throw new IllegalArgumentException("Another location already exists at coordinates (" + x + "," + y + ")");
+            }
+        }
+
         if (!validId(id)) {
             throw new IllegalArgumentException("Location ID must be alphanumeric and not exceed 100 characters");
         }
@@ -379,17 +390,21 @@ public class TravelController {
         if (position < 0 || position >= route.getLocations().size()) {
             throw new IllegalArgumentException("Invalid position for route " + routeId);
         }
-        Location location = route.getLocations().get(position);
+        Location removed = route.removeLocation(position);
+        displayMessage("info", "Location removed from route " + routeId);
+
+        // Remove any arrival events targeting the removed location
+        if (removed != null) {
+            eventQueue.removeIf(ev -> (ev instanceof ArrivalEvent) && ((ArrivalEvent) ev).getDestination().equals(removed));
+        }
+
         // find vehicles at this location and store in an arraylist
         List<Vehicle> vehiclesAtLocation = new ArrayList<>();
         for (Vehicle vehicle : vehicles.values()) {
-            if (vehicle.getRoute() == route && vehicle.getCurrentLocation() == location) {
+            if (vehicle.getRoute() == route && vehicle.getCurrentLocation() == removed) {
                 vehiclesAtLocation.add(vehicle);
             }
         }
-        // remove location from route
-        route.removeLocation(position);
-        displayMessage("info", "Location removed from route " + routeId);
         // if there are vehicles at this location, set their current position to the next location in the route
         for (Vehicle vehicle : vehiclesAtLocation) {
             if (route.getLocations().isEmpty()) {
@@ -453,8 +468,22 @@ public class TravelController {
         if (position < 0 || position >= route.getLocations().size()) {
             throw new IllegalArgumentException("Invalid position for route " + routeId);
         }
+        Route oldRoute = vehicle.getRoute();
+        if (oldRoute != null && oldRoute != route) {
+            oldRoute.getVehicles().remove(vehicle);
+        }
+        // Add to new route list if absent
+        if (!route.getVehicles().contains(vehicle)) {
+            route.getVehicles().add(vehicle);
+        }
+
         vehicle.setCurrentRoute(route);
         vehicle.setCurrentPosition(position);
+
+        // Schedule a new departure from this position at current controller time
+        DepartureEvent departureEvent = new DepartureEvent(time, vehicle, this);
+        addEvent(departureEvent);
+
         displayMessage("info", "Vehicle " + vehicleId + " positioned on route " + routeId);
     }
 
@@ -547,10 +576,14 @@ public class TravelController {
             displayMessage("error", "No scheduled events");
             return;
         }
-        Event nextEvent = eventQueue.poll();
-        time = Math.max(time, nextEvent.getTime());
-        nextEvent.execute();
-        displayMessage("info", "Advanced to time: " + time + " and executed " + nextEvent);
+
+        int nextTime = eventQueue.peek().getTime();
+        while (!eventQueue.isEmpty() && eventQueue.peek().getTime() == nextTime) {
+            Event e = eventQueue.poll();
+            time = Math.max(time, e.getTime());
+            e.execute();
+            displayMessage("info", "Advanced to time: " + time + " and executed " + e);
+        }
     }
 
     public void jumpToTime(int newTime) {
@@ -587,7 +620,7 @@ public class TravelController {
             return;
         }
         Event nextEvent = eventQueue.peek();
-        displayMessage("info", "Next event is scheduled at time: " + nextEvent.getTime());
+        displayMessage("info", "Next event: " + nextEvent.toString());
     }
 
     private void displayVehicleStatus(String vehicleId) {
