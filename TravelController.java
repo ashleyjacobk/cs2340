@@ -352,8 +352,10 @@ public class TravelController {
                 if (vehicle.getCurrentLocation() == null) {
                     vehicle.setCurrentPosition(position);
                     displayMessage("info", "Vehicle " + vehicle.getId() + " is now positioned at " + location.getName() + " on route " + routeId);
+                    DepartureEvent departureEvent = new DepartureEvent(time, vehicle, this);
+                    addEvent(departureEvent);
+                    displayMessage("info", "Departure event scheduled for vehicle " + vehicle.getId() + " at time " + time);
                 }
-                vehicle.setCurrentPosition(position);
             }
         } else {
             throw new IllegalArgumentException("Invalid position for route " + routeId);
