@@ -5,6 +5,7 @@ public class TravelController {
     private Map<String, Vehicle> vehicles;
     private Map<String, Location> locations;
     private Map<String, Route> routes;
+    private List<Hazard> hazards; 
 
     // times -- phase 2
     // private double time = 0.0;
@@ -15,6 +16,7 @@ public class TravelController {
         this.vehicles = new TreeMap<>();
         this.locations = new TreeMap<>();
         this.routes = new TreeMap<>();
+        this.hazards = new ArrayList<>();
     }
 
     public void commandLoop() {
@@ -151,6 +153,21 @@ public class TravelController {
                             throw new IllegalArgumentException("Correct usage for display_vehicle_status is: display_vehicle_status,<vehicleId>");
                         }
                         displayVehicleStatus(tokens[1]);
+                        break;
+                    case "create_hazard":
+                        if (tokens.length < 4 || tokens.length > 5) {
+                            throw new IllegalArgumentException("Correct usage for create_hazard is: create_hazard,<description>,<type(short_term or long_term)>,<impact>,<location1Id>,[<location2Id>]");
+                        }
+                        String description = tokens[1].trim();
+                        Hazard.HazardType type = Hazard.HazardType.valueOf(tokens[2].trim().toUpperCase());
+                        int impact = Integer.parseInt(tokens[3].trim());
+                        String location1Id = tokens[4].trim();
+                        Location location1 = locations.get(location1Id);
+                        if (location1 == null) {
+                            throw new IllegalArgumentException("Location with ID " + location1Id + " does not exist");
+                        }
+                        Location location2 = (tokens.length == 5) ? locations.get(tokens[5].trim()) : null;
+                        // TODO: make constructor for Hazard
                         break;
                     case "exit":
                         System.out.println("exit acknowledged");
