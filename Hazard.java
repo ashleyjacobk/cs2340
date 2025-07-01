@@ -5,11 +5,6 @@ public class Hazard {
     private Location location1;
     private Location location2; // second location optional if it is a hazard affecting the connection b/w two locations
 
-    public enum HazardType {
-        SHORT_TERM,
-        LONG_TERM
-    }
-
     public Hazard(String description, HazardType type, int impact, Location location1, Location location2) {
         this.description = description;
         this.type = type;

@@ -107,24 +107,6 @@ public class TravelController {
                         }
                         displayVehiclesOnRoute(tokens[1]);
                         break;
-                    case "displayAllRoutes":
-                        if (tokens.length != 1) {
-                            throw new IllegalArgumentException("Usage: displayAllRoutes");
-                        }
-                        displayAllRoutes();
-                        break;
-                    case "displayAllVehicles":
-                        if (tokens.length != 1) {
-                            throw new IllegalArgumentException("Usage: displayAllVehicles");
-                        }
-                        displayAllVehicles();
-                        break;
-                    case "displayCurrentTime":
-                        if (tokens.length != 1) {
-                            throw new IllegalArgumentException("Usage: displayCurrentTime");
-                        }
-                        displayCurrentTime();
-                        break;
                     case "display_time":
                         System.out.println(getTime());
                         break;
@@ -155,19 +137,34 @@ public class TravelController {
                         displayVehicleStatus(tokens[1]);
                         break;
                     case "create_hazard":
-                        if (tokens.length < 4 || tokens.length > 5) {
+                        if (tokens.length < 5 || tokens.length > 6) {
                             throw new IllegalArgumentException("Correct usage for create_hazard is: create_hazard,<description>,<type(short_term or long_term)>,<impact>,<location1Id>,[<location2Id>]");
                         }
                         String description = tokens[1].trim();
-                        Hazard.HazardType type = Hazard.HazardType.valueOf(tokens[2].trim().toUpperCase());
+                        HazardType type = HazardType.valueOf(tokens[2].trim().toUpperCase());
                         int impact = Integer.parseInt(tokens[3].trim());
-                        String location1Id = tokens[4].trim();
-                        Location location1 = locations.get(location1Id);
+                        Location location1 = locations.get(tokens[4].trim());
                         if (location1 == null) {
-                            throw new IllegalArgumentException("Location with ID " + location1Id + " does not exist");
+                            throw new IllegalArgumentException("Location with ID " + tokens[4].trim() + " does not exist");
                         }
-                        Location location2 = (tokens.length == 5) ? locations.get(tokens[5].trim()) : null;
-                        // TODO: make constructor for Hazard
+                        Location location2 = (tokens.length == 6) ? locations.get(tokens[5].trim()) : null; // makes second location optional
+                        if (location2 != null && !locations.containsKey(tokens[5].trim())) {
+                            throw new IllegalArgumentException("Location with ID " + tokens[5].trim() + " does not exist");
+                        }
+                        if (tokens.length == 6) {
+                            createHazard(description, type, impact, location1, location2);
+                        } else if (tokens.length == 5) { // only one location
+                            createHazard(description, type, impact, location1);
+                        }
+                        break;
+                    case "display_hazards":
+                        displayHazards();
+                        break;
+                    case "display_hazards_at_location":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for display_hazards_at_location is: display_hazards_at_location,<locationId>");
+                        }
+                        displayHazardsAtLocation(tokens[1]);
                         break;
                     case "exit":
                         System.out.println("exit acknowledged");
@@ -175,7 +172,7 @@ public class TravelController {
                         return;
                     case "help":
                         System.out.println("Available commands:");
-                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, display_time, advance_time, jump_to_time, advance_time_to_next_event, display_next_event, display_vehicle_status, exit");
+                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, display_time, advance_time, jump_to_time, advance_time_to_next_event, display_next_event, display_vehicle_status, create_hazard, display_hazards, display_hazards_at_location, exit");
                         break;
                     default:
                         System.out.println("command " + tokens[0] + " NOT acknowledged");
@@ -668,20 +665,40 @@ public class TravelController {
         System.out.println(status.toUpperCase() + ": " + text_output);
     }
 
-    /*
-     * Convenience helper methods (lifted from Version 1) to expose quick, public
-     * views of the simulator state. 
-     */
-
-    public void displayAllRoutes() {
-        displayRoutes();
+    // Hazard creation methods
+    private void createHazard(String description, HazardType type, int impact, Location location1, Location location2) {
+        Hazard hazard = new Hazard(description, type, impact, location1, location2);
+        hazards.add(hazard);
+        displayMessage("info", "Hazard created: " + hazard.toString());
+    }
+    private void createHazard(String description, HazardType type, int impact, Location location1) {
+        Hazard hazard = new Hazard(description, type, impact, location1);
+        hazards.add(hazard);
+        displayMessage("info", "Hazard created: " + hazard.toString());
     }
 
-    public void displayAllVehicles() {
-        displayVehicles();
+    // display hazards methods
+    private void displayHazards() {
+        if (hazards.isEmpty()) {
+            displayMessage("info", "No hazards available");
+            return;
+        }
+        hazards.forEach(System.out::println);
     }
-
-    public void displayCurrentTime() {
-        System.out.println(getTime());
+    private void displayHazardsAtLocation(String locationId) {
+        locationId = locationId.trim();
+        Location location = locations.get(locationId);
+        if (location == null) {
+            throw new IllegalArgumentException("Invalid location ID");
+        }
+        List<Hazard> hazardsAtLocation = hazards.stream()
+            .filter(h -> h.getLocation1().equals(location) || (h.getLocation2() != null && h.getLocation2().equals(location)))
+            .collect(Collectors.toList());
+        
+        if (hazardsAtLocation.isEmpty()) {
+            displayMessage("info", "No hazards at location " + locationId);
+        } else {
+            hazardsAtLocation.forEach(System.out::println);
+        }
     }
 }
