@@ -20,7 +20,15 @@ public class ArrivalEvent implements Event {
     public void execute() {
         vehicle.arriveAt(destination);
         controller.displayMessage("info", "Vehicle " + vehicle.getId() + " has arrived at " + destination.getName() + ".");
-        int departureTime = this.time + 1;
+        int exchangeTime = 1; // default exchange time
+        // account for short-term hazards
+        for (Hazard hazard : controller.getHazards()) {
+            if (hazard.isShortTerm() && hazard.affectsLocation(destination)) {
+                controller.displayMessage("info", "Applying short-term hazard " + hazard.getDescription() + " to vehicle " + vehicle.getId() + ".");
+                exchangeTime += (int) hazard.getImpact();
+            }
+        }
+        int departureTime = this.time + exchangeTime;
         DepartureEvent departureEvent = new DepartureEvent(departureTime, vehicle, controller);
         controller.addEvent(departureEvent);
     }

@@ -152,7 +152,7 @@ public class TravelController {
                             }
                         }
                         HazardType type = HazardType.valueOf(tokens[3].trim().toUpperCase());
-                        int impact = Integer.parseInt(tokens[4].trim());
+                        double impact = Double.parseDouble(tokens[4].trim());
                         Location location1 = locations.get(tokens[5].trim());
                         if (location1 == null) {
                             throw new IllegalArgumentException("Location with ID " + tokens[5].trim() + " does not exist");
@@ -639,19 +639,34 @@ public class TravelController {
      * @param speed
      * @return the travel time in minutes
      */
-    public int computeTravelMinutes(double distance, double speed) {
+    public int computeTravelMinutes(double distance, double speed, Location from, Location to) {
         if (speed <= 0) {
             throw new IllegalArgumentException("Speed must be greater than zero.");
         }
         double hours = distance / speed;
-        int minutes = (int) (hours * 60);
-        return Math.max(minutes, 1); // to make sure theres at least 1 minute of travel time
+        double minutes = hours * 60; 
+        // to account for long-term hazards
+        for (Hazard hazard : hazards) {
+            if (hazard.isLongTerm() && hazard.affectsConnection(from, to)) {
+                displayMessage("info", "Applying long-term hazard " + hazard.getDescription() + " to travel time.");
+                minutes *= hazard.getImpact();
+            }
+        }
+        return Math.max((int) minutes, 1); // to make sure theres at least 1 minute of travel time
     }
 
+    /**
+     * Adds an event to the event queue.
+     * @param event
+     */
     public void addEvent(Event event) {
         eventQueue.add(event);
     }
 
+    /**
+     * Advances the simulation to the next scheduled event.
+     * If there are no events, it displays an error message.
+     */
     public void advanceToNextEvent() {
         if (eventQueue.isEmpty()) {
             displayMessage("error", "No scheduled events");
@@ -664,6 +679,11 @@ public class TravelController {
         displayMessage("info", "Advanced to time: " + time);
     }
 
+    /**
+     * Jumps to a specified time, executing all events up to that time.
+     * If the new time is less than or equal to the current time, it displays an error message.
+     * @param newTime the time to jump to
+     */
     public void jumpToTime(int newTime) {
         if (newTime <= time) {
             displayMessage("error", "Cannot go backwards in time.");
@@ -679,6 +699,11 @@ public class TravelController {
         displayMessage("info", "Time is now " + time);
     }
 
+    /**
+     * Advances the simulation time by a specified number of minutes.
+     * @throws IllegalArgumentException if the number of minutes is less than or equal to zero.
+     * @param minutes the number of minutes to advance
+     */
     public void advanceTime(int minutes) {
         if (minutes <= 0) {
             throw new IllegalArgumentException("Time to advance must be greater than zero.");
@@ -687,10 +712,18 @@ public class TravelController {
         jumpToTime(newTime);
     }
 
+    /**
+     * Gets the current simulation time.
+     * @return the current time in minutes
+     */
     public int getTime() {
         return time;
     }
 
+    /**
+     * Displays the time of the next scheduled event.
+     * If there are no events, it displays a message indicating that there are no scheduled events.
+     */
     public void displayNextEventTime() {
         if (eventQueue.isEmpty()) {
             displayMessage("info", "No scheduled events.");
@@ -705,6 +738,11 @@ public class TravelController {
         }
     }
 
+    /**
+     * Displays the status of a vehicle, indicating whether it is in transit or at a location.
+     * @throws IllegalArgumentException if the vehicle does not exist.
+     * @param vehicleId the ID of the vehicle to check
+     */
     private void displayVehicleStatus(String vehicleId) {
         vehicleId = vehicleId.trim();
         Vehicle vehicle = vehicles.get(vehicleId);
@@ -718,23 +756,55 @@ public class TravelController {
         }
     }
 
+    /**
+     * Displays a message with a specified status and text output.
+     * @param status the status of the message (e.g., "info", "error")
+     * @param text_output the text to display
+     */
     void displayMessage(String status, String text_output) {
         System.out.println(status.toUpperCase() + ": " + text_output);
     }
 
     // Hazard creation methods
-    private void createHazard(String description, String id, HazardType type, int impact, Location location1, Location location2) {
+    /**
+     * Creates a hazard with the specified parameters (including a second location).
+     * Displays an error message if the hazard ID already exists or if the locations are invalid.
+     * @param description
+     * @param id
+     * @param type
+     * @param impact
+     * @param location1
+     * @param location2
+     */
+    private void createHazard(String description, String id, HazardType type, double impact, Location location1, Location location2) {
         Hazard hazard = new Hazard(description, id, type, impact, location1, location2);
         hazards.add(hazard);
         displayMessage("info", "Hazard created: " + hazard.toString());
     }
-    private void createHazard(String description, String id, HazardType type, int impact, Location location1) {
+    /**
+     * Creates a hazard with the specified parameters.
+     * Displays an error message if the hazard ID already exists or if the location is invalid.
+     * @param description
+     * @param id
+     * @param type
+     * @param impact
+     * @param location1
+     */
+    private void createHazard(String description, String id, HazardType type, double impact, Location location1) {
         Hazard hazard = new Hazard(description, id, type, impact, location1);
         hazards.add(hazard);
         displayMessage("info", "Hazard created: " + hazard.toString());
     }
 
+    public List<Hazard> getHazards() {
+        return hazards;
+    }
+
     // display hazards methods
+    /**
+     * Displays all hazards in the system.
+     * If there are no hazards, it displays a message indicating that there are no hazards available.
+     */
     private void displayHazards() {
         if (hazards.isEmpty()) {
             displayMessage("info", "No hazards available");
@@ -742,6 +812,12 @@ public class TravelController {
         }
         hazards.forEach(System.out::println);
     }
+    /**
+     * Displays all hazards at a specified location.
+     * If there are no hazards at that location, it displays a message indicating that there are no hazards at that location.
+     * @throws IllegalArgumentException if the location ID is invalid.
+     * @param locationId
+     */
     private void displayHazardsAtLocation(String locationId) {
         locationId = locationId.trim();
         Location location = locations.get(locationId);
@@ -760,6 +836,11 @@ public class TravelController {
     }
 
     // remove hazards
+    /**
+     * Removes a hazard with the specified ID.
+     * @throws IllegalArgumentException if the hazard ID is invalid or does not exist.
+     * @param hazardId
+     */
     private void removeHazard(String hazardId) {
         hazardId = hazardId.trim();
         Hazard hazardToRemove = null;

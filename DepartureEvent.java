@@ -39,7 +39,7 @@ public class DepartureEvent implements Event {
         controller.displayMessage("info", "Vehicle " + vehicle.getId() + " is departing from " + currentLocation.getName() + " towards " + nextLocation.getName() + ".");
 
         double distance = currentLocation.distanceTo(nextLocation);
-        int travelTime = controller.computeTravelMinutes(distance, vehicle.getSpeed());
+        int travelTime = controller.computeTravelMinutes(distance, vehicle.getSpeed(), currentLocation, nextLocation);
         int arrivalTime = time + travelTime;
 
         ArrivalEvent arrivalEvent = new ArrivalEvent(arrivalTime, vehicle, nextLocation, controller);

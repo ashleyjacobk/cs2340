@@ -2,11 +2,11 @@ public class Hazard {
     private String description;
     private String id;
     private HazardType type;
-    private int impact;
+    private double impact;
     private Location location1;
     private Location location2; // second location optional if it is a hazard affecting the connection b/w two locations
 
-    public Hazard(String description, String id, HazardType type, int impact, Location location1, Location location2) {
+    public Hazard(String description, String id, HazardType type, double impact, Location location1, Location location2) {
         this.description = description;
         this.id = id;
         this.type = type;
@@ -14,7 +14,7 @@ public class Hazard {
         this.location1 = location1;
         this.location2 = location2;
     }
-    public Hazard(String description, String id, HazardType type, int impact, Location location1) {
+    public Hazard(String description, String id, HazardType type, double impact, Location location1) {
         this(description, id, type, impact, location1, null);
     }
 
@@ -28,7 +28,7 @@ public class Hazard {
     public HazardType getType() {
         return type;
     }
-    public int getImpact() {
+    public double getImpact() {
         return impact;
     }
     public Location getLocation1() {
@@ -69,6 +69,9 @@ public class Hazard {
      * @return true if the hazard affects the connection, false otherwise
      */
     public boolean affectsConnection(Location loc1, Location loc2) {
+        if (location2 == null) {
+            return false;
+        }
         return (location1.equals(loc1) && location2.equals(loc2)) || (location1.equals(loc2) && location2.equals(loc1));
     }
 
