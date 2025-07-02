@@ -137,24 +137,34 @@ public class TravelController {
                         displayVehicleStatus(tokens[1]);
                         break;
                     case "create_hazard":
-                        if (tokens.length < 5 || tokens.length > 6) {
-                            throw new IllegalArgumentException("Correct usage for create_hazard is: create_hazard,<description>,<type(short_term or long_term)>,<impact>,<location1Id>,[<location2Id>]");
+                        if (tokens.length < 6 || tokens.length > 7) {
+                            throw new IllegalArgumentException("Correct usage for create_hazard is: create_hazard,<description>,<id>,<type(short_term or long_term)>,<impact>,<location1Id>,[<location2Id>]");
                         }
                         String description = tokens[1].trim();
-                        HazardType type = HazardType.valueOf(tokens[2].trim().toUpperCase());
-                        int impact = Integer.parseInt(tokens[3].trim());
-                        Location location1 = locations.get(tokens[4].trim());
-                        if (location1 == null) {
-                            throw new IllegalArgumentException("Location with ID " + tokens[4].trim() + " does not exist");
+                        String id = tokens[2].trim();
+                        if (!validId(id)) {
+                            throw new IllegalArgumentException("Hazard ID must be alphanumeric and up to 100 characters long");
                         }
-                        Location location2 = (tokens.length == 6) ? locations.get(tokens[5].trim()) : null; // makes second location optional
-                        if (location2 != null && !locations.containsKey(tokens[5].trim())) {
+                        // Check for uniqueness of hazard ID 
+                        for (Hazard h : hazards) {
+                            if (h.getId().equals(id)) {
+                                throw new IllegalArgumentException("Hazard with ID " + id + " already exists.");
+                            }
+                        }
+                        HazardType type = HazardType.valueOf(tokens[3].trim().toUpperCase());
+                        int impact = Integer.parseInt(tokens[4].trim());
+                        Location location1 = locations.get(tokens[5].trim());
+                        if (location1 == null) {
                             throw new IllegalArgumentException("Location with ID " + tokens[5].trim() + " does not exist");
                         }
-                        if (tokens.length == 6) {
-                            createHazard(description, type, impact, location1, location2);
-                        } else if (tokens.length == 5) { // only one location
-                            createHazard(description, type, impact, location1);
+                        if (tokens.length == 7) {
+                            Location location2 = locations.get(tokens[6].trim());
+                            if (location2 == null) {
+                                throw new IllegalArgumentException("Location with ID " + tokens[6].trim() + " does not exist");
+                            }
+                            createHazard(description, id, type, impact, location1, location2);
+                        } else {
+                            createHazard(description, id, type, impact, location1);
                         }
                         break;
                     case "display_hazards":
@@ -166,13 +176,18 @@ public class TravelController {
                         }
                         displayHazardsAtLocation(tokens[1]);
                         break;
+                    case "remove_hazard":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for remove_hazard is: remove_hazard,<hazardId>");
+                        }
+                        removeHazard(tokens[1]);
+                        break;
                     case "exit":
                         System.out.println("exit acknowledged");
                         commandLineInput.close();
                         return;
                     case "help":
-                        System.out.println("Available commands:");
-                        System.out.println("create_vehicle, display_vehicles, create_location, display_locations, create_route, add_location_to_route, remove_location_from_route, display_locations_in_route, display_routes, set_vehicle_position, display_vehicles_at_location, display_vehicles_on_route, display_time, advance_time, jump_to_time, advance_time_to_next_event, display_next_event, display_vehicle_status, create_hazard, display_hazards, display_hazards_at_location, exit");
+                        System.out.println(help());
                         break;
                     default:
                         System.out.println("command " + tokens[0] + " NOT acknowledged");
@@ -183,6 +198,48 @@ public class TravelController {
         }
     }
     
+    /**
+     * Displays the help message with available commands.
+     * 
+     * @return a string containing the help message.
+     */
+    private String help() {
+        return "Available Commands:\n" +
+                "==== Vehicle Commands ====\n" +
+                "  create_vehicle,<capacity>,<type>,<id>,<route>,<currentLocation>,<speed>\n" +
+                "  display_vehicles\n" +
+                "==== Location Commands ====\n" +
+                "  create_location,<name>,<id>,<x>,<y>\n" +
+                "  display_locations\n" +
+                "==== Route Commands ====\n" +
+                "  create_route,<id>,<vehicleType>\n" +
+                "  add_location_to_route,<routeId>,<locationId>,<position>\n" +
+                "  remove_location_from_route,<routeId>,<position>\n" +
+                "  display_locations_in_route,<routeId>\n" +
+                "  display_routes\n" +
+                "==== Vehicle Positioning Commands ====\n" +
+                "  set_vehicle_position,<vehicleId>,<routeId>,<position>\n" +
+                "  display_vehicles_at_location,<locationId>\n" +
+                "  display_vehicles_on_route,<routeId>\n" +
+                "==== Time Commands ====\n" +
+                "  display_time\n" +
+                "  advance_time,<time_to_advance>\n" +
+                "  jump_to_time,<new_time>\n" +
+                "  advance_time_to_next_event\n" +
+                "  display_next_event\n" +
+                "==== Vehicle Status Commands ====\n" +
+                "  display_vehicle_status,<vehicleId>\n" +
+                "==== Hazard Commands ====\n" +
+                "  create_hazard,<description>,<id>,<type(short_term or long_term)>,<impact>,<location1Id>,[<location2Id>]\n" +
+                "  display_hazards\n" +
+                "  display_hazards_at_location,<locationId>\n" +
+                "  remove_hazard,<hazardId>\n" +
+                "==== Exit Command ====\n" +
+                "  exit\n" +
+                "==== Help Command ====\n" +
+                "  help\n";
+    }
+
     /**
      * Helper method to validate ID format.
      * 
@@ -666,13 +723,13 @@ public class TravelController {
     }
 
     // Hazard creation methods
-    private void createHazard(String description, HazardType type, int impact, Location location1, Location location2) {
-        Hazard hazard = new Hazard(description, type, impact, location1, location2);
+    private void createHazard(String description, String id, HazardType type, int impact, Location location1, Location location2) {
+        Hazard hazard = new Hazard(description, id, type, impact, location1, location2);
         hazards.add(hazard);
         displayMessage("info", "Hazard created: " + hazard.toString());
     }
-    private void createHazard(String description, HazardType type, int impact, Location location1) {
-        Hazard hazard = new Hazard(description, type, impact, location1);
+    private void createHazard(String description, String id, HazardType type, int impact, Location location1) {
+        Hazard hazard = new Hazard(description, id, type, impact, location1);
         hazards.add(hazard);
         displayMessage("info", "Hazard created: " + hazard.toString());
     }
@@ -700,5 +757,22 @@ public class TravelController {
         } else {
             hazardsAtLocation.forEach(System.out::println);
         }
+    }
+
+    // remove hazards
+    private void removeHazard(String hazardId) {
+        hazardId = hazardId.trim();
+        Hazard hazardToRemove = null;
+        for (Hazard hazard : hazards) {
+            if (hazard.getId().equals(hazardId)) {
+                hazardToRemove = hazard;
+                break;
+            }
+        }
+        if (hazardToRemove == null) {
+            throw new IllegalArgumentException("Hazard with ID " + hazardId + " does not exist");
+        }
+        hazards.remove(hazardToRemove);
+        displayMessage("info", "Hazard with ID " + hazardId + " removed successfully");
     }
 }

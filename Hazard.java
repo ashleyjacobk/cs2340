@@ -1,24 +1,29 @@
 public class Hazard {
     private String description;
+    private String id;
     private HazardType type;
     private int impact;
     private Location location1;
     private Location location2; // second location optional if it is a hazard affecting the connection b/w two locations
 
-    public Hazard(String description, HazardType type, int impact, Location location1, Location location2) {
+    public Hazard(String description, String id, HazardType type, int impact, Location location1, Location location2) {
         this.description = description;
+        this.id = id;
         this.type = type;
         this.impact = impact;
         this.location1 = location1;
         this.location2 = location2;
     }
-    public Hazard(String description, HazardType type, int impact, Location location1) {
-        this(description, type, impact, location1, null);
+    public Hazard(String description, String id, HazardType type, int impact, Location location1) {
+        this(description, id, type, impact, location1, null);
     }
 
     /* GETTERS */
     public String getDescription() {
         return description;
+    }
+    public String getId() {
+        return id;
     }
     public HazardType getType() {
         return type;
@@ -37,9 +42,10 @@ public class Hazard {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Hazard: ").append(description)
-          .append(", Type: ").append(type)
-          .append(", Impact: ").append(impact)
+        sb.append("Hazard with ID: ").append(getId())
+          .append(", Description: ").append(getDescription())
+          .append(", Type: ").append(getType())
+          .append(", Impact: ").append(getImpact())
           .append(", Location1: ").append(location1.getName());
         if (location2 != null) {
             sb.append(", Location2: ").append(location2.getName());
