@@ -8,12 +8,17 @@ public class Location {
     private List<Vehicle> vehicles;
     private String id;
     private double x, y; // coordinates
+    private int waitingPassengers; // passengers currently waiting at this location
+    // ranges for probabilistic passenger exchange operations
+    private int debarkLow = 0, debarkHigh = 0;
+    private int transferLow = 0, transferHigh = 0;
+    private int boardLow = 0, boardHigh = 0;
 
     /* CONSTRUCTERS */
     public Location(String name, String id, int totalPassengers, boolean status, double x, double y) {
         this.name = name;
         this.id = id;
-        this.totalPassengers = totalPassengers;
+        this.waitingPassengers = totalPassengers;
         this.status = status;
         this.vehicles = new ArrayList<>();
         this.x = x;
@@ -32,7 +37,7 @@ public class Location {
     }
     public String getId() { return id; }
     public int getTotalPassengers() {
-        return totalPassengers;
+        return waitingPassengers;
     }
     public boolean getStatus() {
         return status;
@@ -46,17 +51,44 @@ public class Location {
     public double getY() {
         return y;
     }
+    public int getWaitingPassengers() {
+        return waitingPassengers;
+    }
     
     /* SETTERS */
     public void setName(String name) {
         this.name = name;
     }
     public void setTotalPassengers(int totalPassengers) {
-        this.totalPassengers = totalPassengers;
+        this.waitingPassengers = totalPassengers;
     }
     public void setStatus(boolean status) {
         this.status = status;
     }
+    public void setWaitingPassengers(int waitingPassengers) {
+        this.waitingPassengers = Math.max(0, waitingPassengers);
+    }
+    public void setDebarkRange(int low, int high) {
+        validateRange(low, high);
+        this.debarkLow = low;
+        this.debarkHigh = high;
+    }
+    public void setTransferRange(int low, int high) {
+        validateRange(low, high);
+        this.transferLow = low;
+        this.transferHigh = high;
+    }
+    public void setBoardRange(int low, int high) {
+        validateRange(low, high);
+        this.boardLow = low;
+        this.boardHigh = high;
+    }
+    public int getDebarkLow() { return debarkLow; }
+    public int getDebarkHigh() { return debarkHigh; }
+    public int getTransferLow() { return transferLow; }
+    public int getTransferHigh() { return transferHigh; }
+    public int getBoardLow() { return boardLow; }
+    public int getBoardHigh() { return boardHigh; }
 
     /* METHODS */
     
@@ -69,5 +101,11 @@ public class Location {
     @Override
     public String toString() {
         return this.name;
+    }
+
+    private void validateRange(int low, int high) {
+        if (low < 0 || high < 0 || low > high) {
+            throw new IllegalArgumentException("Invalid range: low=" + low + " high=" + high);
+        }
     }
 }

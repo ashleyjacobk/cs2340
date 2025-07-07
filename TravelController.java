@@ -182,6 +182,30 @@ public class TravelController {
                         }
                         removeHazard(tokens[1]);
                         break;
+                    case "set_vehicle_riders":
+                        if (tokens.length != 3) {
+                            throw new IllegalArgumentException("Correct usage for set_vehicle_riders is: set_vehicle_riders,<vehicleId>,<numRiders>");
+                        }
+                        tokens[2] = tokens[2].trim();
+                        setVehicleRiders(tokens[1], Integer.parseInt(tokens[2]));
+                        break;
+                    case "set_waiting_passengers":
+                        if (tokens.length != 3) {
+                            throw new IllegalArgumentException("Correct usage for set_waiting_passengers is: set_waiting_passengers,<locationId>,<numWaiting>");
+                        }
+                        tokens[2] = tokens[2].trim();
+                        setWaitingPassengers(tokens[1], Integer.parseInt(tokens[2]));
+                        break;
+                    case "set_passenger_ranges":
+                        if (tokens.length != 8) {
+                            throw new IllegalArgumentException("Correct usage for set_passenger_ranges is: set_passenger_ranges,<locationId>,<debarkLow>,<debarkHigh>,<transferLow>,<transferHigh>,<boardLow>,<boardHigh>");
+                        }
+                        for (int i = 2; i < 8; i++) { tokens[i] = tokens[i].trim(); }
+                        setPassengerRanges(tokens[1],
+                                           Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]),
+                                           Integer.parseInt(tokens[4]), Integer.parseInt(tokens[5]),
+                                           Integer.parseInt(tokens[6]), Integer.parseInt(tokens[7]));
+                        break;
                     case "exit":
                         System.out.println("exit acknowledged");
                         commandLineInput.close();
@@ -234,6 +258,10 @@ public class TravelController {
                 "  display_hazards\n" +
                 "  display_hazards_at_location,<locationId>\n" +
                 "  remove_hazard,<hazardId>\n" +
+                "==== Passenger Configuration Commands ====\n" +
+                "  set_vehicle_riders,<vehicleId>,<numRiders>\n" +
+                "  set_waiting_passengers,<locationId>,<numWaiting>\n" +
+                "  set_passenger_ranges,<locationId>,<debarkLow>,<debarkHigh>,<transferLow>,<transferHigh>,<boardLow>,<boardHigh>\n" +
                 "==== Exit Command ====\n" +
                 "  exit\n" +
                 "==== Help Command ====\n" +
@@ -855,5 +883,41 @@ public class TravelController {
         }
         hazards.remove(hazardToRemove);
         displayMessage("info", "Hazard with ID " + hazardId + " removed successfully");
+    }
+
+    // === NEW PASSENGER CONFIGURATION METHODS ===
+    private void setVehicleRiders(String vehicleId, int riders) {
+        vehicleId = vehicleId.trim();
+        Vehicle v = vehicles.get(vehicleId);
+        if (v == null) {
+            throw new IllegalArgumentException("Vehicle with ID " + vehicleId + " does not exist");
+        }
+        v.setCurrentPassengers(riders);
+        displayMessage("info", "Vehicle " + vehicleId + " rider count set to " + riders);
+    }
+
+    private void setWaitingPassengers(String locationId, int waiting) {
+        locationId = locationId.trim();
+        Location loc = locations.get(locationId);
+        if (loc == null) {
+            throw new IllegalArgumentException("Location with ID " + locationId + " does not exist");
+        }
+        loc.setWaitingPassengers(waiting);
+        displayMessage("info", "Location " + locationId + " waiting passengers set to " + waiting);
+    }
+
+    private void setPassengerRanges(String locationId,
+                                    int debarkLow, int debarkHigh,
+                                    int transferLow, int transferHigh,
+                                    int boardLow, int boardHigh) {
+        locationId = locationId.trim();
+        Location loc = locations.get(locationId);
+        if (loc == null) {
+            throw new IllegalArgumentException("Location with ID " + locationId + " does not exist");
+        }
+        loc.setDebarkRange(debarkLow, debarkHigh);
+        loc.setTransferRange(transferLow, transferHigh);
+        loc.setBoardRange(boardLow, boardHigh);
+        displayMessage("info", "Passenger ranges updated for location " + locationId);
     }
 }

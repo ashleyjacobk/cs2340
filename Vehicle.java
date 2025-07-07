@@ -110,6 +110,50 @@ public class Vehicle {
         this.currentLocation = location;
     }
 
+    public int getCurrentPassengers() {
+        return currentCapacity;
+    }
+
+    public void setCurrentPassengers(int passengers) {
+        if (passengers < 0 || passengers > totalCapacity) {
+            throw new IllegalArgumentException("Passenger count must be between 0 and total capacity");
+        }
+        this.currentCapacity = passengers;
+    }
+
+    public int getTotalCapacity() {
+        return totalCapacity;
+    }
+
+    public void setTotalCapacity(int capacity) {
+        if (capacity < 0) {
+            throw new IllegalArgumentException("Capacity cannot be negative");
+        }
+        this.totalCapacity = capacity;
+        if (currentCapacity > totalCapacity) {
+            currentCapacity = totalCapacity;
+        }
+    }
+
+    /**
+     * Removes up to num passengers from the vehicle, returns actual number removed.
+     */
+    public int debarkPassengers(int num) {
+        int removed = Math.min(num, currentCapacity);
+        currentCapacity -= removed;
+        return removed;
+    }
+
+    /**
+     * Boards up to num passengers, returns actual number boarded.
+     */
+    public int boardPassengers(int num) {
+        int space = totalCapacity - currentCapacity;
+        int added = Math.min(num, space);
+        currentCapacity += added;
+        return added;
+    }
+
     @Override
     public String toString() {
         String locationStr = (currentLocation != null) ? currentLocation.getName() : "in transit";
