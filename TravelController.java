@@ -915,6 +915,11 @@ public class TravelController {
         if (loc == null) {
             throw new IllegalArgumentException("Location with ID " + locationId + " does not exist");
         }
+
+        if (waiting < 0) {
+            throw new IllegalArgumentException("Waiting passenger count cannot be negative");
+        }
+
         loc.setWaitingPassengers(waiting);
         displayMessage("info", "Location " + locationId + " waiting passengers set to " + waiting);
     }

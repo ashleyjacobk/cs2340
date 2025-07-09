@@ -52,7 +52,8 @@ public class ArrivalEvent implements Event {
         int delayed = boardAttempt - boarded;
 
         // Update waiting passengers at the location
-        int waitPassNext = waitPassCur - boarded + transfer;
+        // Ensure the new waiting passenger count can never be negative.
+        int waitPassNext = Math.max(0, waitPassCur - boarded + transfer);
         loc.setWaitingPassengers(waitPassNext);
 
         // Report exchange summary
