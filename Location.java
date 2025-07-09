@@ -8,24 +8,25 @@ public class Location {
     private List<Vehicle> vehicles;
     private String id;
     private double x, y; // coordinates
-    private int waitingPassengers; // passengers currently waiting at this location
-    // ranges for probabilistic passenger exchange operations
+    private int waitingPassengers;
+
+    // ranges for passenger exchange operations
     private int debarkLow = 0, debarkHigh = 0;
     private int transferLow = 0, transferHigh = 0;
     private int boardLow = 0, boardHigh = 0;
 
     /* CONSTRUCTERS */
-    public Location(String name, String id, int totalPassengers, boolean status, double x, double y) {
+    public Location(String name, String id, int waitingPassengers, boolean status, double x, double y) {
         this.name = name;
         this.id = id;
-        this.waitingPassengers = totalPassengers;
+        this.waitingPassengers = waitingPassengers;
         this.status = status;
         this.vehicles = new ArrayList<>();
         this.x = x;
         this.y = y;
     }
-    public Location(String name, String id, int totalPassengers) {
-        this(name, id, totalPassengers, true, 0.0, 0.0);
+    public Location(String name, String id, int waitingPassengers) {
+        this(name, id, waitingPassengers, true, 0.0, 0.0);
     }
     public Location(String name, String id) {
         this(name, id, 0, true, 0.0, 0.0);
@@ -35,9 +36,8 @@ public class Location {
     public String getName() {
         return name;
     }
-    public String getId() { return id; }
-    public int getTotalPassengers() {
-        return waitingPassengers;
+    public String getId() { 
+        return id; 
     }
     public boolean getStatus() {
         return status;
@@ -54,19 +54,34 @@ public class Location {
     public int getWaitingPassengers() {
         return waitingPassengers;
     }
-    
+    public int getDebarkLow() { 
+        return debarkLow; 
+    }
+    public int getDebarkHigh() { 
+        return debarkHigh; 
+    }
+    public int getTransferLow() { 
+        return transferLow; 
+    }
+    public int getTransferHigh() { 
+        return transferHigh; 
+    }
+    public int getBoardLow() { 
+        return boardLow; 
+    }
+    public int getBoardHigh() { 
+        return boardHigh; 
+    }
+
     /* SETTERS */
     public void setName(String name) {
         this.name = name;
     }
-    public void setTotalPassengers(int totalPassengers) {
-        this.waitingPassengers = totalPassengers;
+    public void setWaitingPassengers(int waitingPassengers) {
+        this.waitingPassengers = waitingPassengers;
     }
     public void setStatus(boolean status) {
         this.status = status;
-    }
-    public void setWaitingPassengers(int waitingPassengers) {
-        this.waitingPassengers = Math.max(0, waitingPassengers);
     }
     public void setDebarkRange(int low, int high) {
         validateRange(low, high);
@@ -83,12 +98,6 @@ public class Location {
         this.boardLow = low;
         this.boardHigh = high;
     }
-    public int getDebarkLow() { return debarkLow; }
-    public int getDebarkHigh() { return debarkHigh; }
-    public int getTransferLow() { return transferLow; }
-    public int getTransferHigh() { return transferHigh; }
-    public int getBoardLow() { return boardLow; }
-    public int getBoardHigh() { return boardHigh; }
 
     /* METHODS */
     

@@ -885,7 +885,7 @@ public class TravelController {
         displayMessage("info", "Hazard with ID " + hazardId + " removed successfully");
     }
 
-    // === NEW PASSENGER CONFIGURATION METHODS ===
+    // === PASSENGER CONFIGURATION METHODS ===
     private void setVehicleRiders(String vehicleId, int riders) {
         vehicleId = vehicleId.trim();
         Vehicle v = vehicles.get(vehicleId);
@@ -906,10 +906,7 @@ public class TravelController {
         displayMessage("info", "Location " + locationId + " waiting passengers set to " + waiting);
     }
 
-    private void setPassengerRanges(String locationId,
-                                    int debarkLow, int debarkHigh,
-                                    int transferLow, int transferHigh,
-                                    int boardLow, int boardHigh) {
+    private void setPassengerRanges(String locationId, int debarkLow, int debarkHigh, int transferLow, int transferHigh, int boardLow, int boardHigh) {
         locationId = locationId.trim();
         Location loc = locations.get(locationId);
         if (loc == null) {
