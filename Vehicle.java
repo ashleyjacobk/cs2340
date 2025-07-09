@@ -21,6 +21,10 @@ public class Vehicle {
     private boolean inTransit = false;
 
     public Vehicle(int capacity, VehicleType type, String id, Route route, Location currentLocation, double speed) {
+        if (capacity < 0) {
+            throw new IllegalArgumentException("Capacity cannot be negative");
+        }
+
         this.currentCapacity = 0;
         this.totalCapacity = capacity;
         this.type = type;
