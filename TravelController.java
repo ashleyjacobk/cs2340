@@ -810,7 +810,7 @@ public class TravelController {
         displayMessage("info", "Hazard created: " + hazard.toString());
 
         if (type == HazardType.SHORT_TERM) {
-            java.util.Iterator<Event> iterator = eventQueue.iterator();
+            Iterator<Event> iterator = eventQueue.iterator();
             while (iterator.hasNext()) {
                 Event e = iterator.next();
                 if (e instanceof DepartureEvent) {
