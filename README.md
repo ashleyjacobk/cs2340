@@ -205,6 +205,79 @@ All commands use a comma-separated format. Below are the available commands and 
  display_vehicle_status,V1
  ```
 
+8.  **Display vehicle riders**
+ Display the current number of riders on a given vehicle.
+ ```
+ display_vehicle_riders,<vehicleId>
+ ```
+ Example:
+ ```
+ display_vehicle_riders,V1
+ ```
+
+---
+
+### Passenger Configuration
+
+1.  **Set vehicle riders**  
+Set the current number of riders already on a vehicle.
+```
+set_vehicle_riders,<vehicleId>,<numRiders>
+```
+Example:
+```
+set_vehicle_riders,V1,35
+```
+
+2.  **Set waiting passengers at a location**  
+Adjust how many passengers are currently waiting at a stop.
+```
+set_waiting_passengers,<locationId>,<numWaiting>
+```
+Example:
+```
+set_waiting_passengers,L1,120
+```
+
+3.  **Set passenger exchange ranges**  
+Configure the min / max numbers used when passengers debark, transfer, and board at a location.
+```
+set_passenger_ranges,<locationId>,<debarkLow>,<debarkHigh>,<transferLow>,<transferHigh>,<boardLow>,<boardHigh>
+```
+Example:
+```
+set_passenger_ranges,L1,0,10,0,5,0,15
+```
+
+---
+
+### Hazard Management
+
+1. **Create a hazard**  
+Create a short-term or long-term hazard that affects travel times at one (or two) locations.
+```
+create_hazard,<description>,<id>,<type(short_term|long_term)>,<impact>,<location1Id>,[<location2Id>]
+```
+Example:
+```
+create_hazard,Track Maintenance,H1,short_term,5,L1
+```
+
+2. **Display all hazards**
+```
+display_hazards
+```
+
+3. **Display hazards at a location**
+```
+display_hazards_at_location,<locationId>
+```
+
+4. **Remove a hazard**
+```
+remove_hazard,<hazardId>
+```
+
 ---
 
 ### Other Commands

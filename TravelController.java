@@ -136,6 +136,12 @@ public class TravelController {
                         }
                         displayVehicleStatus(tokens[1]);
                         break;
+                    case "display_vehicle_riders":
+                        if (tokens.length != 2) {
+                            throw new IllegalArgumentException("Correct usage for display_vehicle_riders is: display_vehicle_riders,<vehicleId>");
+                        }
+                        displayVehicleRiders(tokens[1]);
+                        break;
                     case "create_hazard":
                         if (tokens.length < 6 || tokens.length > 7) {
                             throw new IllegalArgumentException("Correct usage for create_hazard is: create_hazard,<description>,<id>,<type(short_term or long_term)>,<impact>,<location1Id>,[<location2Id>]");
@@ -253,6 +259,7 @@ public class TravelController {
                 "  display_next_event\n" +
                 "==== Vehicle Status Commands ====\n" +
                 "  display_vehicle_status,<vehicleId>\n" +
+                "  display_vehicle_riders,<vehicleId>\n" +
                 "==== Hazard Commands ====\n" +
                 "  create_hazard,<description>,<id>,<type(short_term or long_term)>,<impact>,<location1Id>,[<location2Id>]\n" +
                 "  display_hazards\n" +
@@ -782,6 +789,20 @@ public class TravelController {
         } else {
             displayMessage("info", "Vehicle " + vehicleId + " is at location " + vehicle.getCurrentLocation().getName() + ".");
         }
+    }
+
+    /**
+     * Displays the current passenger count for a vehicle.
+     * @throws IllegalArgumentException if the vehicle does not exist.
+     * @param vehicleId the ID of the vehicle to check
+     */
+    private void displayVehicleRiders(String vehicleId) {
+        vehicleId = vehicleId.trim();
+        Vehicle vehicle = vehicles.get(vehicleId);
+        if (vehicle == null) {
+            throw new IllegalArgumentException("Vehicle with ID " + vehicleId + " does not exist");
+        }
+        displayMessage("info", "Current passenger count for vehicle " + vehicleId + ": " + vehicle.getCurrentPassengers());
     }
 
     /**
