@@ -168,6 +168,19 @@ public class TravelController {
                             if (location2 == null) {
                                 throw new IllegalArgumentException("Location with ID " + tokens[6].trim() + " does not exist");
                             }
+
+                            // Ensure both locations are on the same route
+                            boolean commonRouteFound = false;
+                            for (Route r : routes.values()) {
+                                if (r.getLocations().contains(location1) && r.getLocations().contains(location2)) {
+                                    commonRouteFound = true;
+                                    break;
+                                }
+                            }
+                            if (!commonRouteFound) {
+                                throw new IllegalArgumentException("Locations " + location1.getId() + " and " + location2.getId() + " are not on the same route and cannot be used for a two-location hazard.");
+                            }
+
                             createHazard(description, id, type, impact, location1, location2);
                         } else {
                             createHazard(description, id, type, impact, location1);
