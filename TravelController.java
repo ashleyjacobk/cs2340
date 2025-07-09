@@ -823,7 +823,7 @@ public class TravelController {
                         int newDepartureTime = de.getTime() + (int) impact;
                         DepartureEvent newEvent = new DepartureEvent(newDepartureTime, v, this);
                         addEvent(newEvent);
-                        displayMessage("info", "Departure for vehicle " + v.getId() + " delayed due to new hazard. New departure at " + newDepartureTime);
+                        displayMessage("info", "Departure for vehicle " + v.getId() + " delayed due to hazard " + hazard.getDescription() + ". " + "New departure at " + newDepartureTime);
                     }
                 }
             }
