@@ -78,7 +78,16 @@ public class Location {
         this.name = name;
     }
     public void setWaitingPassengers(int waitingPassengers) {
+        if (waitingPassengers < 0) {
+            throw new IllegalArgumentException("Waiting passenger count cannot be negative");
+        }
         this.waitingPassengers = waitingPassengers;
+    }
+    public void setTotalPassengers(int totalPassengers) {
+        if (totalPassengers < 0) {
+            throw new IllegalArgumentException("Passenger count cannot be negative");
+        }
+        this.waitingPassengers = totalPassengers;
     }
     public void setStatus(boolean status) {
         this.status = status;
