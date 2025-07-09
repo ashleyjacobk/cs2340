@@ -795,34 +795,44 @@ public class TravelController {
 
     // Hazard creation methods
     /**
-     * Creates a hazard with the specified parameters (including a second location).
-     * Displays an error message if the hazard ID already exists or if the locations are invalid.
+     * Creates a hazard with the specified parameters.
+     * @throws IllegalArgumentException if the hazard ID already exists, or if the ID is invalid.
      * @param description
      * @param id
      * @param type
      * @param impact
      * @param location1
-     * @param location2
+     * @param location2 optional second location for two-location hazards
      */
     private void createHazard(String description, String id, HazardType type, double impact, Location location1, Location location2) {
         Hazard hazard = new Hazard(description, id, type, impact, location1, location2);
         hazards.add(hazard);
         displayMessage("info", "Hazard created: " + hazard.toString());
+
+        if (type == HazardType.SHORT_TERM) {
+            java.util.Iterator<Event> iterator = eventQueue.iterator();
+            while (iterator.hasNext()) {
+                Event e = iterator.next();
+                if (e instanceof DepartureEvent) {
+                    DepartureEvent de = (DepartureEvent) e;
+                    Vehicle v = de.getVehicle();
+
+                    if (!v.isInTransit() && location1.equals(v.getCurrentLocation())) {
+                        iterator.remove();
+
+                        int newDepartureTime = de.getTime() + (int) impact;
+                        DepartureEvent newEvent = new DepartureEvent(newDepartureTime, v, this);
+                        addEvent(newEvent);
+                        displayMessage("info", "Departure for vehicle " + v.getId() + " delayed due to new hazard. New departure at " + newDepartureTime);
+                    }
+                }
+            }
+        }
     }
-    /**
-     * Creates a hazard with the specified parameters.
-     * Displays an error message if the hazard ID already exists or if the location is invalid.
-     * @param description
-     * @param id
-     * @param type
-     * @param impact
-     * @param location1
-     */
+    
     private void createHazard(String description, String id, HazardType type, double impact, Location location1) {
-        Hazard hazard = new Hazard(description, id, type, impact, location1);
-        hazards.add(hazard);
-        displayMessage("info", "Hazard created: " + hazard.toString());
-    }
+        createHazard(description, id, type, impact, location1, null);
+    }    
 
     public List<Hazard> getHazards() {
         return hazards;
