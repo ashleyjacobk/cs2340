@@ -831,26 +831,29 @@ public class TravelController {
         displayMessage("info", "Hazard created: " + hazard.toString());
 
         if (type == HazardType.SHORT_TERM) {
-            Iterator<Event> iterator = eventQueue.iterator();
-            while (iterator.hasNext()) {
-                Event e = iterator.next();
+            List<Event> eventsToRemove = new ArrayList<>();
+            List<Event> eventsToAdd = new ArrayList<>();
+
+            for (Event e : eventQueue) {
                 if (e instanceof DepartureEvent) {
                     DepartureEvent de = (DepartureEvent) e;
                     Vehicle v = de.getVehicle();
 
-                    if (!v.isInTransit() && location1.equals(v.getCurrentLocation())) {
-                        iterator.remove();
-
+                    if (v != null && !v.isInTransit() && v.getCurrentLocation() != null && hazard.affectsLocation(v.getCurrentLocation())) {
+                        eventsToRemove.add(de);
                         int newDepartureTime = de.getTime() + (int) impact;
                         DepartureEvent newEvent = new DepartureEvent(newDepartureTime, v, this);
-                        addEvent(newEvent);
-                        displayMessage("info", "Departure for vehicle " + v.getId() + " delayed due to hazard " + hazard.getDescription() + ". " + "New departure at " + newDepartureTime);
+                        eventsToAdd.add(newEvent);
+                        displayMessage("info", "Departure for vehicle " + v.getId() + " delayed due to new hazard. New departure at " + newDepartureTime);
                     }
                 }
             }
+
+            eventQueue.removeAll(eventsToRemove);
+            eventQueue.addAll(eventsToAdd);
         }
     }
-    
+
     private void createHazard(String description, String id, HazardType type, double impact, Location location1) {
         createHazard(description, id, type, impact, location1, null);
     }    
