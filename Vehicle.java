@@ -151,6 +151,10 @@ public class Vehicle {
         int space = totalCapacity - currentCapacity;
         int added = Math.min(num, space);
         currentCapacity += added;
+
+        // Inform about boarding action
+        System.out.println("INFO: " + added + " passenger" + (added == 1 ? "" : "s") + " boarded vehicle " + ID + ".");
+
         return added;
     }
 
