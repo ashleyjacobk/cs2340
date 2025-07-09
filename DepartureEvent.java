@@ -46,6 +46,10 @@ public class DepartureEvent implements Event {
         controller.addEvent(arrivalEvent);
     }
 
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+
     @Override
     public String toString() {
         String nextLocName = (vehicle.getNextLocation() != null) ? vehicle.getNextLocation().getName() : "None";
