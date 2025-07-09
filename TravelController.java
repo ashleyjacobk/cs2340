@@ -307,6 +307,11 @@ public class TravelController {
      */
     private void createVehicle(int capacity, String type, String id, String route, String currentLocation, double speed) {
         VehicleType vehicleType;
+
+        if (capacity < 0) {
+            throw new IllegalArgumentException("Capacity cannot be negative");
+        }
+
         id = id.trim();
         route = route.trim();
         currentLocation = currentLocation.trim();
