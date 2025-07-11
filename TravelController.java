@@ -574,6 +574,11 @@ public class TravelController {
             vehicle.setCurrentPosition(nextPosition);
             Location nextLocation = vehicle.getNextLocation();
             displayMessage("info", "Vehicle " + vehicle.getId() + " will now travel to " + (nextLocation != null ? nextLocation.getName() : "no next location"));
+
+            // Schedule a new departure event for the repositioned vehicle so it can continue its route
+            DepartureEvent depAfterRemoval = new DepartureEvent(time, vehicle, this);
+            addEvent(depAfterRemoval);
+            displayMessage("info", "Departure event scheduled for vehicle " + vehicle.getId() + " at time " + time + " due to location removal");
         }
     }
 
