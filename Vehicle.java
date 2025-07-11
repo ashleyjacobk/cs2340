@@ -19,6 +19,8 @@ public class Vehicle {
     private Location currentLocation;
     private double speed; // in kph
     private boolean inTransit = false;
+    private Location originLocation; // station vehicle departed from when in transit
+    private Location destinationLocation; // upcoming station vehicle is heading to
 
     public Vehicle(int capacity, VehicleType type, String id, Route route, Location currentLocation, double speed) {
         if (capacity < 0) {
@@ -104,14 +106,19 @@ public class Vehicle {
         }
     }
 
-    public void setInTransit() {
+    public void setInTransit(Location origin, Location destination) {
         this.inTransit = true;
         this.currentLocation = null; // Clear current location when in transit
+        this.originLocation = origin;
+        this.destinationLocation = destination;
     }
 
     public void arriveAt(Location location) {
         this.inTransit = false;
         this.currentLocation = location;
+        // clear transit info
+        this.originLocation = null;
+        this.destinationLocation = null;
     }
 
     public int getCurrentPassengers() {
@@ -164,8 +171,15 @@ public class Vehicle {
 
     @Override
     public String toString() {
-        String locationStr = (currentLocation != null) ? currentLocation.getName() : "in transit";
+        String locationStr;
+        if (inTransit) {
+            String from = (originLocation != null) ? originLocation.getName() : "unknown";
+            String to = (destinationLocation != null) ? destinationLocation.getName() : "unknown";
+            locationStr = "in transit from " + from + " to " + to;
+        } else {
+            locationStr = (currentLocation != null) ? currentLocation.getName() : "unknown";
+        }
         String routeStr = (route != null) ? route.toString() : "no route assigned";
-        return this.type + " " + this.ID + " is at " + locationStr + " on route " + routeStr;
+        return this.type + " " + this.ID + " is " + locationStr + " on route " + routeStr;
     }
 }

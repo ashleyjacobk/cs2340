@@ -5,10 +5,12 @@ public class ArrivalEvent implements Event {
     private final Vehicle vehicle;
     private final Location destination;
     private final TravelController controller;
+    private final Location origin;
 
-    public ArrivalEvent(int time, Vehicle vehicle, Location destination, TravelController controller) {
+    public ArrivalEvent(int time, Vehicle vehicle, Location origin, Location destination, TravelController controller) {
         this.time = time;
         this.vehicle = vehicle;
+        this.origin = origin;
         this.destination = destination;
         this.controller = controller;
     }
@@ -72,7 +74,7 @@ public class ArrivalEvent implements Event {
         DepartureEvent departureEvent = new DepartureEvent(departureTime, vehicle, controller);
         controller.addEvent(departureEvent);
 
-        controller.displayMessage("info", "Vehicle " + vehicle.getId() + " has arrived at " + destination.getName() + ". Departure scheduled at time " + departureTime + ".");
+        controller.displayMessage("info", "Vehicle " + vehicle.getId() + " has arrived at " + destination.getName() + " from " + (origin != null ? origin.getName() : "unknown") + ". Departure scheduled at time " + departureTime + ".");
     }
 
     private int randInRange(Random rand, int low, int high) {
@@ -87,10 +89,14 @@ public class ArrivalEvent implements Event {
 
     @Override
     public String toString() {
-        return String.format("Time %d: ARRIVAL of vehicle %s at %s", time, vehicle.getId(), destination.getName());
+        return String.format("Time %d: ARRIVAL of vehicle %s from %s to %s", time, vehicle.getId(), (origin != null ? origin.getName() : "unknown"), destination.getName());
     }
 
     public Location getDestination() {
         return destination;
+    }
+
+    public Location getOrigin() {
+        return origin;
     }
 }
