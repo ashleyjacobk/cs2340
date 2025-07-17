@@ -1,3 +1,4 @@
+package entities;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class Vehicle {
     private boolean inTransit = false;
     private Location originLocation; // station vehicle departed from when in transit
     private Location destinationLocation; // upcoming station vehicle is heading to
+    private Location previousLocation;
 
     public Vehicle(int capacity, VehicleType type, String id, Route route, Location currentLocation, double speed) {
         if (capacity < 0) {

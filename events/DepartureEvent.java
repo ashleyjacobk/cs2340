@@ -1,3 +1,8 @@
+package events;
+import controllers.TravelController;
+import entities.Location;
+import entities.Vehicle;
+
 public class DepartureEvent implements Event {
     private final int time;
     private final Vehicle vehicle;

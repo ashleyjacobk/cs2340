@@ -1,4 +1,10 @@
+package events;
 import java.util.Random;
+
+import controllers.TravelController;
+import entities.Hazard;
+import entities.Location;
+import entities.Vehicle;
 
 public class ArrivalEvent implements Event {
     private final int time;
