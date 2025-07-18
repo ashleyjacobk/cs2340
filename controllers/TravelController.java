@@ -1,5 +1,6 @@
 package controllers;
 import java.util.*;
+import managers.VehicleManager;
 import java.util.stream.Collectors;
 
 import entities.Hazard;
@@ -17,6 +18,7 @@ public class TravelController {
     private Map<String, Location> locations;
     private Map<String, Route> routes;
     private List<Hazard> hazards; 
+    private VehicleManager vehicleManager;
 
     // times -- phase 2
     // private double time = 0.0;
@@ -28,228 +30,12 @@ public class TravelController {
         this.locations = new TreeMap<>();
         this.routes = new TreeMap<>();
         this.hazards = new ArrayList<>();
+        this.vehicleManager = new VehicleManager(vehicles, locations, routes, this);
     }
+    // Legacy text-based commandLoop removed; use commands.CommandInterpreter instead.
 
-    public void commandLoop() {
-        Scanner commandLineInput = new Scanner(System.in);
-        String wholeInputLine;
-        String[] tokens;
-        final String DELIMITER = ",";
-
-        while (true) {
-            try {
-                System.out.print("$> ");
-                wholeInputLine = commandLineInput.nextLine();
-                tokens = wholeInputLine.split(DELIMITER);
-
-                if (tokens[0].indexOf("//") == 0 || wholeInputLine.equals("")) {
-                    continue;
-                }
-
-                switch (tokens[0]) {
-                    case "create_vehicle":
-                        if (tokens.length != 7) {
-                            throw new IllegalArgumentException("Correct usage for create_vehicle is: create_vehicle,<capacity>,<type>,<id>,<route>,<currentLocation>,<speed>");
-                        }
-                        tokens[1] = tokens[1].trim();
-                        tokens[6] = tokens[6].trim();
-                        
-                        createVehicle(Integer.parseInt(tokens[1]), tokens[2], tokens[3], tokens[4], tokens[5], Double.parseDouble(tokens[6]));
-                        break;
-                    case "display_vehicles":
-                        displayVehicles();
-                        break;
-                    case "create_location":
-                        if (tokens.length != 5) {
-                            throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>,<id>,<x>,<y>");
-                        }
-                        tokens[3] = tokens[3].trim();
-                        tokens[4] = tokens[4].trim();
-                        createLocation(tokens[1], tokens[2], Double.parseDouble(tokens[3]), Double.parseDouble(tokens[4])); // 2 and 3 are x and y respectively
-                        break;
-                    case "display_locations":
-                        displayLocations();
-                        break;
-                    case "create_route":
-                        if (tokens.length != 3) {
-                            throw new IllegalArgumentException("Correct usage for create_route is: create_route,<id>,<vehicleType>");
-                        }
-                        createRoute(tokens[1], tokens[2]);
-                        break;
-                    case "add_location_to_route":
-                        if (tokens.length != 4) {
-                            throw new IllegalArgumentException("Correct usage for add_location_to_route is: add_location_to_route,<routeId>,<locationId>,<position>");
-                        }
-                        tokens[3] = tokens[3].trim();
-                        addLocationToRoute(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
-                        break;
-                    case "remove_location_from_route":
-                        if (tokens.length != 3) {
-                            throw new IllegalArgumentException("Correct usage for remove_location_from_route is: remove_location_from_route,<routeId>,<position>");
-                        }
-                        tokens[2] = tokens[2].trim();
-                        removeLocationFromRoute(tokens[1], Integer.parseInt(tokens[2]));
-                        break;
-                    case "display_locations_in_route":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for display_locations_in_route is: display_locations_in_route,<routeId>");
-                        }
-                        displayLocationsInRoute(tokens[1]);
-                        break;
-                    case "display_routes":
-                        displayRoutes();
-                        break;
-                    case "set_vehicle_position":
-                        if (tokens.length != 4) {
-                            throw new IllegalArgumentException("Correct usage for set_vehicle_position is: set_vehicle_position,<vehicleId>,<routeId>,<position>");
-                        }
-                        tokens[3] = tokens[3].trim();
-                        setVehiclePosition(tokens[1], tokens[2], Integer.parseInt(tokens[3]));
-                        break;
-                    case "display_vehicles_at_location":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for display_vehicles_at_location is: display_vehicles_at_location,<locationId>");
-                        }
-                        displayVehiclesAtLocation(tokens[1]);
-                        break;
-                    case "display_vehicles_on_route":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for display_vehicles_on_route is: display_vehicles_on_route,<routeId>");
-                        }
-                        displayVehiclesOnRoute(tokens[1]);
-                        break;
-                    case "display_time":
-                        System.out.println(getTime());
-                        break;
-                    case "advance_time":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for advance_time is: advance_time,<time_to_advance>");
-                        }
-                        tokens[1] = tokens[1].trim();
-                        advanceTime(Integer.parseInt(tokens[1]));
-                        break;
-                    case "jump_to_time":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for jump_to_time is: jump_to_time,<new_time>");
-                        }
-                        tokens[1] = tokens[1].trim();
-                        jumpToTime(Integer.parseInt(tokens[1]));
-                        break;
-                    case "advance_time_to_next_event":
-                        advanceToNextEvent();
-                        break;
-                    case "display_next_event":
-                        displayNextEventTime();
-                        break;
-                    case "display_vehicle_status":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for display_vehicle_status is: display_vehicle_status,<vehicleId>");
-                        }
-                        displayVehicleStatus(tokens[1]);
-                        break;
-                    case "display_vehicle_riders":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for display_vehicle_riders is: display_vehicle_riders,<vehicleId>");
-                        }
-                        displayVehicleRiders(tokens[1]);
-                        break;
-                    case "create_hazard":
-                        if (tokens.length < 6 || tokens.length > 7) {
-                            throw new IllegalArgumentException("Correct usage for create_hazard is: create_hazard,<description>,<id>,<type(short_term or long_term)>,<impact>,<location1Id>,[<location2Id>]");
-                        }
-                        String description = tokens[1].trim();
-                        String id = tokens[2].trim();
-                        if (!validId(id)) {
-                            throw new IllegalArgumentException("Hazard ID must be alphanumeric and up to 100 characters long");
-                        }
-                        // Check for uniqueness of hazard ID 
-                        for (Hazard h : hazards) {
-                            if (h.getId().equals(id)) {
-                                throw new IllegalArgumentException("Hazard with ID " + id + " already exists.");
-                            }
-                        }
-                        HazardType type = HazardType.valueOf(tokens[3].trim().toUpperCase());
-                        double impact = Double.parseDouble(tokens[4].trim());
-                        Location location1 = locations.get(tokens[5].trim());
-                        if (location1 == null) {
-                            throw new IllegalArgumentException("Location with ID " + tokens[5].trim() + " does not exist");
-                        }
-                        if (tokens.length == 7) {
-                            Location location2 = locations.get(tokens[6].trim());
-                            if (location2 == null) {
-                                throw new IllegalArgumentException("Location with ID " + tokens[6].trim() + " does not exist");
-                            }
-
-                            // Ensure both locations are on the same route
-                            boolean commonRouteFound = false;
-                            for (Route r : routes.values()) {
-                                if (r.getLocations().contains(location1) && r.getLocations().contains(location2)) {
-                                    commonRouteFound = true;
-                                    break;
-                                }
-                            }
-                            if (!commonRouteFound) {
-                                throw new IllegalArgumentException("Locations " + location1.getId() + " and " + location2.getId() + " are not on the same route and cannot be used for a two-location hazard.");
-                            }
-
-                            createHazard(description, id, type, impact, location1, location2);
-                        } else {
-                            createHazard(description, id, type, impact, location1);
-                        }
-                        break;
-                    case "display_hazards":
-                        displayHazards();
-                        break;
-                    case "display_hazards_at_location":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for display_hazards_at_location is: display_hazards_at_location,<locationId>");
-                        }
-                        displayHazardsAtLocation(tokens[1]);
-                        break;
-                    case "remove_hazard":
-                        if (tokens.length != 2) {
-                            throw new IllegalArgumentException("Correct usage for remove_hazard is: remove_hazard,<hazardId>");
-                        }
-                        removeHazard(tokens[1]);
-                        break;
-                    case "set_vehicle_riders":
-                        if (tokens.length != 3) {
-                            throw new IllegalArgumentException("Correct usage for set_vehicle_riders is: set_vehicle_riders,<vehicleId>,<numRiders>");
-                        }
-                        tokens[2] = tokens[2].trim();
-                        setVehicleRiders(tokens[1], Integer.parseInt(tokens[2]));
-                        break;
-                    case "set_waiting_passengers":
-                        if (tokens.length != 3) {
-                            throw new IllegalArgumentException("Correct usage for set_waiting_passengers is: set_waiting_passengers,<locationId>,<numWaiting>");
-                        }
-                        tokens[2] = tokens[2].trim();
-                        setWaitingPassengers(tokens[1], Integer.parseInt(tokens[2]));
-                        break;
-                    case "set_passenger_ranges":
-                        if (tokens.length != 8) {
-                            throw new IllegalArgumentException("Correct usage for set_passenger_ranges is: set_passenger_ranges,<locationId>,<debarkLow>,<debarkHigh>,<transferLow>,<transferHigh>,<boardLow>,<boardHigh>");
-                        }
-                        for (int i = 2; i < 8; i++) { tokens[i] = tokens[i].trim(); }
-                        setPassengerRanges(tokens[1],
-                                           Integer.parseInt(tokens[2]), Integer.parseInt(tokens[3]),
-                                           Integer.parseInt(tokens[4]), Integer.parseInt(tokens[5]),
-                                           Integer.parseInt(tokens[6]), Integer.parseInt(tokens[7]));
-                        break;
-                    case "exit":
-                        System.out.println("exit acknowledged");
-                        commandLineInput.close();
-                        return;
-                    case "help":
-                        System.out.println(help());
-                        break;
-                    default:
-                        System.out.println("command " + tokens[0] + " NOT acknowledged");
-                }
-            } catch (Exception e) {
-                displayMessage("error", "during command loop >> " + e.getMessage());
-            }
-        }
+    public VehicleManager getVehicleManager() {
+        return vehicleManager;
     }
     
     /**
@@ -390,16 +176,7 @@ public class TravelController {
         displayMessage("info", "Departure event scheduled for vehicle " + id + " at time " + time);
     }
 
-    /**
-     * Displays all vehicles in service.
-     */
-    public void displayVehicles() {
-        if (vehicles.isEmpty()) {
-            displayMessage("info", "No vehicles in service");
-            return;
-        }
-        vehicles.values().forEach(System.out::println);
-    }
+    // Vehicle display operations are now handled by VehicleManager.
 
     /**
      * Creates a location with the specified name.
@@ -645,50 +422,7 @@ public class TravelController {
         displayMessage("info", "Vehicle " + vehicleId + " positioned on route " + routeId);
     }
 
-    /**
-     * Displays all vehicles at a specified location.
-     * @throws IllegalArgumentException if the location does not exist.
-     * @param locationId
-     */
-    private void displayVehiclesAtLocation(String locationId) {
-        locationId = locationId.trim();
-
-        Location location = locations.get(locationId);
-        if (location == null) {
-            throw new IllegalArgumentException("Invalid location ID");
-        }
-        List<Vehicle> vehiclesAtLocation = vehicles.values().stream()
-            .filter(v -> v.getCurrentLocation() == location)
-            .collect(Collectors.toList());
-        
-        if (vehiclesAtLocation.isEmpty()) {
-            displayMessage("info", "No vehicles at location " + locationId);
-        } else {
-            vehiclesAtLocation.forEach(System.out::println);
-        }
-    }
-
-    /**
-     * Displays all vehicles assigned to a specified route.
-     * @throws IllegalArgumentException if the route does not exist.
-     * @param routeId
-     */
-    private void displayVehiclesOnRoute(String routeId) {
-        routeId = routeId.trim();
-
-        Route route = routes.get(routeId);
-        if (route == null) {
-            throw new IllegalArgumentException("Invalid route ID");
-        }
-        List<Vehicle> vehiclesOnRoute = route.getVehicles();
-        if (vehiclesOnRoute.isEmpty()) {
-            displayMessage("info", "No vehicles assigned to route " + routeId);
-        } else {
-            for (Vehicle vehicle : vehiclesOnRoute) {
-                System.out.println(vehicle);
-            }
-        }
-    }
+    /* Removed vehicle display methods (now in VehicleManager) */
 
     /**
      * Computes the travel time of the vehicle's distance in minutes
@@ -793,38 +527,6 @@ public class TravelController {
                 displayMessage("info", "Next event: " + ev.toString());
             }
         }
-    }
-
-    /**
-     * Displays the status of a vehicle, indicating whether it is in transit or at a location.
-     * @throws IllegalArgumentException if the vehicle does not exist.
-     * @param vehicleId the ID of the vehicle to check
-     */
-    private void displayVehicleStatus(String vehicleId) {
-        vehicleId = vehicleId.trim();
-        Vehicle vehicle = vehicles.get(vehicleId);
-        if (vehicle == null) {
-            throw new IllegalArgumentException("Vehicle with ID " + vehicleId + " does not exist");
-        }
-        if (vehicle.isInTransit()) {
-            displayMessage("info", "Vehicle " + vehicleId + " departed from " + vehicle.getPreviousLocation().getName() + " and is in transit.");
-        } else {
-            displayMessage("info", "Vehicle " + vehicleId + " is at location " + vehicle.getCurrentLocation().getName() + ".");
-        }
-    }
-
-    /**
-     * Displays the current passenger count for a vehicle.
-     * @throws IllegalArgumentException if the vehicle does not exist.
-     * @param vehicleId the ID of the vehicle to check
-     */
-    private void displayVehicleRiders(String vehicleId) {
-        vehicleId = vehicleId.trim();
-        Vehicle vehicle = vehicles.get(vehicleId);
-        if (vehicle == null) {
-            throw new IllegalArgumentException("Vehicle with ID " + vehicleId + " does not exist");
-        }
-        displayMessage("info", "Current passenger count for vehicle " + vehicleId + ": " + vehicle.getCurrentPassengers());
     }
 
     /**

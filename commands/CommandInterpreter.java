@@ -38,7 +38,7 @@ public class CommandInterpreter {
             controller.createVehicle(capacity, tokens[2], tokens[3], tokens[4], tokens[5], speed);
         });
 
-        commandMap.put("display_vehicles", tokens -> controller.displayVehicles());
+        commandMap.put("display_vehicles", tokens -> controller.getVehicleManager().displayVehicles());
 
         commandMap.put("advance_time", tokens -> {
             if (tokens.length != 2) {
