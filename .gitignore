@@ -11,7 +11,6 @@ __pycache__/
 *.pyo
 
 # Java
-*.jar
 *.war
 *.ear
 
@@ -54,3 +53,4 @@ coverage/
 
 # Custom
 *.bak
+*.zone
