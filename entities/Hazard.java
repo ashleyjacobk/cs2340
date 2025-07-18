@@ -1,3 +1,4 @@
+package entities;
 public class Hazard {
     private String description;
     private String id;

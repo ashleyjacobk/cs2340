@@ -1,5 +1,16 @@
+package controllers;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import entities.Hazard;
+import entities.HazardType;
+import entities.Location;
+import entities.Route;
+import entities.Vehicle;
+import entities.VehicleType;
+import events.ArrivalEvent;
+import events.DepartureEvent;
+import events.Event;
 
 public class TravelController {
     private Map<String, Vehicle> vehicles;
@@ -547,38 +558,26 @@ public class TravelController {
         Location removed = route.removeLocation(position);
         displayMessage("info", "Location removed from route " + routeId);
 
-        // Remove any arrival events targeting the removed location
         if (removed != null) {
             eventQueue.removeIf(ev -> (ev instanceof ArrivalEvent) && ((ArrivalEvent) ev).getDestination().equals(removed));
         }
 
-        // find vehicles at this location and store in an arraylist
-        List<Vehicle> vehiclesAtLocation = new ArrayList<>();
+        // Handle vehicles that were at the removed location
         for (Vehicle vehicle : vehicles.values()) {
             if (vehicle.getRoute() == route && vehicle.getCurrentLocation() == removed) {
-                vehiclesAtLocation.add(vehicle);
-            }
-        }
-        // if there are vehicles at this location, set their current position to the next location in the route
-        for (Vehicle vehicle : vehiclesAtLocation) {
-            if (route.getLocations().isEmpty()) {
-                vehicle.arriveAt(null); // if no locations left, make vehicle arrive at null
-                displayMessage("info", "Vehicle " + vehicle.getId() + " is in transit on the empty route " + routeId + ".");
-                continue;
-            }
-            int nextPosition = position;
-            if (nextPosition >= route.getLocations().size()) {
-                nextPosition = 0; // wrap around to the first location if at the end
-            }
-            displayMessage("info", "Vehicle " + vehicle.getId() + " repositioned to " + route.getLocations().get(nextPosition).getName());
-            vehicle.setCurrentPosition(nextPosition);
-            Location nextLocation = vehicle.getNextLocation();
-            displayMessage("info", "Vehicle " + vehicle.getId() + " will now travel to " + (nextLocation != null ? nextLocation.getName() : "no next location"));
+                if (route.getLocations().isEmpty()) {
+                    vehicle.arriveAt(null);
+                    displayMessage("info", "Vehicle " + vehicle.getId() + " is now on an empty route " + routeId + " and will not move.");
+                } else {
+                    int nextPosition = position % route.getLocations().size(); // Wrap around if needed
+                    vehicle.setCurrentPosition(nextPosition);
+                    displayMessage("info", "Vehicle " + vehicle.getId() + " repositioned to " + route.getLocations().get(nextPosition).getName());
 
-            // Schedule a new departure event for the repositioned vehicle so it can continue its route
-            DepartureEvent depAfterRemoval = new DepartureEvent(time, vehicle, this);
-            addEvent(depAfterRemoval);
-            displayMessage("info", "Departure event scheduled for vehicle " + vehicle.getId() + " at time " + time + " due to location removal");
+                    DepartureEvent newDeparture = new DepartureEvent(time, vehicle, this);
+                    addEvent(newDeparture);
+                    displayMessage("info", "New departure scheduled for vehicle " + vehicle.getId() + " at time " + time);
+                }
+            }
         }
     }
 
@@ -808,7 +807,7 @@ public class TravelController {
             throw new IllegalArgumentException("Vehicle with ID " + vehicleId + " does not exist");
         }
         if (vehicle.isInTransit()) {
-            displayMessage("info", "Vehicle " + vehicleId + " is in transit.");
+            displayMessage("info", "Vehicle " + vehicleId + " departed from " + vehicle.getPreviousLocation().getName() + " and is in transit.");
         } else {
             displayMessage("info", "Vehicle " + vehicleId + " is at location " + vehicle.getCurrentLocation().getName() + ".");
         }
@@ -833,7 +832,7 @@ public class TravelController {
      * @param status the status of the message (e.g., "info", "error")
      * @param text_output the text to display
      */
-    void displayMessage(String status, String text_output) {
+    public void displayMessage(String status, String text_output) {
         System.out.println(status.toUpperCase() + ": " + text_output);
     }
 

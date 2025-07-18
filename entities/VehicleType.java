@@ -1,3 +1,4 @@
+package entities;
 public enum VehicleType {
     BUS,
     TRAM,

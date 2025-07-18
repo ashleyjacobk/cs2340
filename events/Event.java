@@ -1,3 +1,4 @@
+package events;
 public interface Event extends Comparable<Event> {
     int getTime();
     void execute();

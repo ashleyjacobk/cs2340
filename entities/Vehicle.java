@@ -1,3 +1,4 @@
+package entities;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class Vehicle {
     private boolean inTransit = false;
     private Location originLocation; // station vehicle departed from when in transit
     private Location destinationLocation; // upcoming station vehicle is heading to
+    private Location previousLocation;
 
     public Vehicle(int capacity, VehicleType type, String id, Route route, Location currentLocation, double speed) {
         if (capacity < 0) {
@@ -35,6 +37,7 @@ public class Vehicle {
         this.movement = false;
         this.route = route;
         this.currentLocation = currentLocation;
+        this.previousLocation = currentLocation; 
         this.speed = speed;
         this.inTransit = false;
 
@@ -96,6 +99,10 @@ public class Vehicle {
         return currentLocation;
     }
 
+    public Location getPreviousLocation() {
+        return previousLocation;
+    }
+    
     public double getSpeed() {
         return speed;
     }
@@ -107,6 +114,7 @@ public class Vehicle {
     }
 
     public void setInTransit(Location origin, Location destination) {
+        this.previousLocation = origin;
         this.inTransit = true;
         this.currentLocation = null; // Clear current location when in transit
         this.originLocation = origin;
@@ -114,6 +122,7 @@ public class Vehicle {
     }
 
     public void arriveAt(Location location) {
+        this.previousLocation = this.currentLocation; // Update previous location before changing current
         this.inTransit = false;
         this.currentLocation = location;
         // clear transit info
