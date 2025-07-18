@@ -84,7 +84,7 @@ public class Browser extends Application {
         VBox fullArea = new VBox();
 
         StackPane topHeader = new StackPane();
-        Label headerLabel = new Label("Start of the Simulation!");
+        Label headerLabel = new Label("Simulation Start!");
         headerLabel.setPrefSize(100,30);
         topHeader.setStyle("-fx-background-color: #66CC33");
         topHeader.getChildren().addAll(headerLabel);
@@ -103,12 +103,18 @@ public class Browser extends Application {
             everyCommand.getChildren().add(firstCommand);
         } else {
             for (int i = totalCommands.size() - 1; i >= 0; i--) {
-                String commandToPrint = totalCommands.get(i);
                 HBox thisCommand = new HBox();
-                Label writer = new Label(commandToPrint);
-                thisCommand.getChildren().add(writer);
+                Label writer = new Label(totalCommands.get(i));
+                Label spacing = new Label("-----------------------------------");
+                thisCommand.getChildren().addAll(writer, spacing);
+                everyCommand.getChildren().add(thisCommand);
             }
         }
+        commandsArea.setContent(everyCommand);
+        commandsArea.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+
+        fullArea.getChildren().addAll(topHeader, topArea, commandsArea);
+        layout.setCenter(fullArea);
     }
 
     private class CommandHandler implements EventHandler<ActionEvent> {
@@ -118,6 +124,24 @@ public class Browser extends Application {
     }
 
     private void newCommand() {
+        Stage commandStage = new Stage();
+        commandStage.setTitle("New Command");
+        VBox commandArea = new VBox();
 
+        Label writer = new Label("Category");
+
+        ComboBox<String> dropdown = new ComboBox<>();
+        dropdown.getItems().addAll("Route", "Location", "Vehicle", "Passenger", "Hazard", "Time");
+        dropdown.setOnAction(e -> {
+            String selection = dropdown.getValue();
+            System.out.println(selection);
+                }
+        );
+
+        commandArea.getChildren().addAll(writer, dropdown);
+
+        Scene scene = new Scene(commandArea, 400, 200);
+        commandStage.setScene(scene);
+        commandStage.showAndWait();
     }
 }
