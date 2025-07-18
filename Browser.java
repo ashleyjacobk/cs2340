@@ -84,7 +84,7 @@ public class Browser extends Application {
         VBox fullArea = new VBox();
 
         StackPane topHeader = new StackPane();
-        Label headerLabel = new Label("Simulation Start!");
+        Label headerLabel = new Label("Simulation Start!!!");
         headerLabel.setPrefSize(100,30);
         topHeader.setStyle("-fx-background-color: #66CC33");
         topHeader.getChildren().addAll(headerLabel);
@@ -99,8 +99,10 @@ public class Browser extends Application {
         ScrollPane commandsArea = new ScrollPane();
         VBox everyCommand = new VBox();
         if (totalCommands.isEmpty()) {
+            StackPane centerAlign = new StackPane();
             Label firstCommand = new Label("Start the Simulation with your first command...");
-            everyCommand.getChildren().add(firstCommand);
+            centerAlign.getChildren().add(firstCommand);
+            everyCommand.getChildren().add(centerAlign);
         } else {
             for (int i = totalCommands.size() - 1; i >= 0; i--) {
                 HBox thisCommand = new HBox();
@@ -126,21 +128,34 @@ public class Browser extends Application {
     private void newCommand() {
         Stage commandStage = new Stage();
         commandStage.setTitle("New Command");
+        BorderPane completeArea = new BorderPane();
         VBox commandArea = new VBox();
 
+        StackPane centerAlign = new StackPane();
         Label writer = new Label("Category");
+        centerAlign.getChildren().add(writer);
 
         ComboBox<String> dropdown = new ComboBox<>();
+        dropdown.setPrefWidth(400);
         dropdown.getItems().addAll("Route", "Location", "Vehicle", "Passenger", "Hazard", "Time");
         dropdown.setOnAction(e -> {
             String selection = dropdown.getValue();
-            System.out.println(selection);
+            VBox actualCommands = new VBox();
+            if (selection.equalsIgnoreCase("route")) {
+                HBox createRoute = new HBox();
+                Label createRouteWriting = new Label("create_route");
+                TextField written = new TextField("ID");
+                actualCommands.getChildren().add(written);
+                completeArea.setCenter(actualCommands);
+            }
                 }
         );
 
-        commandArea.getChildren().addAll(writer, dropdown);
+        commandArea.getChildren().addAll(centerAlign, dropdown);
 
-        Scene scene = new Scene(commandArea, 400, 200);
+        completeArea.setTop(commandArea);
+
+        Scene scene = new Scene(completeArea, 400, 200);
         commandStage.setScene(scene);
         commandStage.showAndWait();
     }
