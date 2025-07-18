@@ -37,6 +37,7 @@ public class Vehicle {
         this.movement = false;
         this.route = route;
         this.currentLocation = currentLocation;
+        this.previousLocation = currentLocation; 
         this.speed = speed;
         this.inTransit = false;
 
@@ -98,6 +99,10 @@ public class Vehicle {
         return currentLocation;
     }
 
+    public Location getPreviousLocation() {
+        return previousLocation;
+    }
+    
     public double getSpeed() {
         return speed;
     }
@@ -109,6 +114,7 @@ public class Vehicle {
     }
 
     public void setInTransit(Location origin, Location destination) {
+        this.previousLocation = origin;
         this.inTransit = true;
         this.currentLocation = null; // Clear current location when in transit
         this.originLocation = origin;
@@ -116,6 +122,7 @@ public class Vehicle {
     }
 
     public void arriveAt(Location location) {
+        this.previousLocation = this.currentLocation; // Update previous location before changing current
         this.inTransit = false;
         this.currentLocation = location;
         // clear transit info

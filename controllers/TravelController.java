@@ -807,7 +807,7 @@ public class TravelController {
             throw new IllegalArgumentException("Vehicle with ID " + vehicleId + " does not exist");
         }
         if (vehicle.isInTransit()) {
-            displayMessage("info", "Vehicle " + vehicleId + " departed from " + vehicle.getPreviousLocation().getName() + " is in transit.");
+            displayMessage("info", "Vehicle " + vehicleId + " departed from " + vehicle.getPreviousLocation().getName() + " and is in transit.");
         } else {
             displayMessage("info", "Vehicle " + vehicleId + " is at location " + vehicle.getCurrentLocation().getName() + ".");
         }
