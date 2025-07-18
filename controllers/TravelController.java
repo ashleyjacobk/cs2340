@@ -409,7 +409,7 @@ public class TravelController {
      * @param x
      * @param y
      */
-    private void createLocation(String name, String id, double x, double y) {
+    public void createLocation(String name, String id, double x, double y) {
         name = name.trim();
         id = id.trim();
 
@@ -443,7 +443,7 @@ public class TravelController {
      * @param id
      * @param type
      */
-    private void createRoute(String id, String type) {
+    public void createRoute(String id, String type) {
         VehicleType vehicleType;
         id = id.trim();
         try {
@@ -975,5 +975,26 @@ public class TravelController {
         loc.setTransferRange(transferLow, transferHigh);
         loc.setBoardRange(boardLow, boardHigh);
         displayMessage("info", "Passenger ranges updated for location " + locationId);
+    }
+
+    /**
+     * Read-only view of all locations, keyed by ID, for UI rendering purposes.
+     */
+    public Map<String, Location> getLocations() {
+        return Collections.unmodifiableMap(locations);
+    }
+
+    /**
+     * Read-only view of all routes, keyed by ID.
+     */
+    public Map<String, Route> getRoutes() {
+        return Collections.unmodifiableMap(routes);
+    }
+
+    /**
+     * Read-only view of all vehicles, keyed by ID.
+     */
+    public Map<String, Vehicle> getVehicles() {
+        return Collections.unmodifiableMap(vehicles);
     }
 }
