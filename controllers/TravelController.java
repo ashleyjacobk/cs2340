@@ -257,7 +257,7 @@ public class TravelController {
      * 
      * @return a string containing the help message.
      */
-    private String help() {
+    public String help() {
         return "Available Commands:\n" +
                 "==== Vehicle Commands ====\n" +
                 "  create_vehicle,<capacity>,<type>,<id>,<route>,<currentLocation>,<speed>\n" +
@@ -329,7 +329,7 @@ public class TravelController {
      * @param currentLocation
      * @param speed
      */
-    private void createVehicle(int capacity, String type, String id, String route, String currentLocation, double speed) {
+    public void createVehicle(int capacity, String type, String id, String route, String currentLocation, double speed) {
         VehicleType vehicleType;
 
         if (capacity < 0) {
@@ -393,7 +393,7 @@ public class TravelController {
     /**
      * Displays all vehicles in service.
      */
-    private void displayVehicles() {
+    public void displayVehicles() {
         if (vehicles.isEmpty()) {
             displayMessage("info", "No vehicles in service");
             return;
