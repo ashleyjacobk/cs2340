@@ -19,6 +19,7 @@ public class TravelController {
     private Map<String, Route> routes;
     private List<Hazard> hazards; 
     private VehicleManager vehicleManager;
+    private managers.LocationManager locationManager;
 
     // times -- phase 2
     // private double time = 0.0;
@@ -31,6 +32,7 @@ public class TravelController {
         this.routes = new TreeMap<>();
         this.hazards = new ArrayList<>();
         this.vehicleManager = new VehicleManager(vehicles, locations, routes, this);
+        this.locationManager = new managers.LocationManager(locations, this);
     }
     // Legacy text-based commandLoop removed; use commands.CommandInterpreter instead.
 
@@ -178,41 +180,7 @@ public class TravelController {
 
     // Vehicle display operations are now handled by VehicleManager.
 
-    /**
-     * Creates a location with the specified name.
-     * @throws IllegalArgumentException if the location already exists or if the ID is not globally unique.
-     * @param name
-     * @param id usually an abbreviation of the name, but can be anything
-     * @param x
-     * @param y
-     */
-    public void createLocation(String name, String id, double x, double y) {
-        name = name.trim();
-        id = id.trim();
-
-        if (locations.containsKey(id)) {
-            throw new IllegalArgumentException("Location with ID " + id + " already exists");
-        }
-        if (!validId(id)) {
-            throw new IllegalArgumentException("Location ID must be alphanumeric and not exceed 100 characters");
-        }
-        if (!isIdGloballyUnique(id)) {
-            throw new IllegalArgumentException("ID " + id + " is not globally unique across vehicles, locations, and routes");
-        }
-        locations.put(id, new Location(name, id, 0, true, x, y));
-        displayMessage("info", "Location created: " + name + " at ("+x+","+y+")");
-    }
-
-    /**
-     * Displays all locations.
-     */
-    private void displayLocations() {
-        if (locations.isEmpty()) {
-            displayMessage("info", "No locations available");
-            return;
-        }
-        locations.values().forEach(location -> System.out.println(location.getName()));
-    }
+    // Location creation and display responsibilities moved to LocationManager to adhere to SRP.
 
     /**
      * Creates a route with the specified ID.
@@ -698,5 +666,9 @@ public class TravelController {
      */
     public Map<String, Vehicle> getVehicles() {
         return Collections.unmodifiableMap(vehicles);
+    }
+
+    public managers.LocationManager getLocationManager() {
+        return locationManager;
     }
 }

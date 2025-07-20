@@ -60,6 +60,17 @@ public class CommandInterpreter {
             System.out.println("Exiting simulation. Goodbye!");
             System.exit(0);
         });
+
+        commandMap.put("create_location", tokens -> {
+            if (tokens.length != 5) {
+                throw new IllegalArgumentException("Correct usage for create_location is: create_location,<name>,<id>,<x>,<y>");
+            }
+            double x = Double.parseDouble(tokens[3].trim());
+            double y = Double.parseDouble(tokens[4].trim());
+            controller.getLocationManager().createLocation(tokens[1], tokens[2], x, y);
+        });
+
+        commandMap.put("display_locations", tokens -> controller.getLocationManager().displayLocations());
     }
 
     /**
