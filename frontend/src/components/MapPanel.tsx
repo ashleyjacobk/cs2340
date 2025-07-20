@@ -1,6 +1,9 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Paper from '@mui/material/Paper';
+import Popover from '@mui/material/Popover';
+import Typography from '@mui/material/Typography';
 import { TravelController } from '../simulation';
+import Box from '@mui/material/Box';
 
 interface Props {
   controller: TravelController;
@@ -67,6 +70,13 @@ function MapPanel({ controller, width = 600, height = 400 }: Props) {
   const mapX = (x: number) => padding + (x - minX) * scaleX;
   const mapY = (y: number) => padding + (maxY - y) * scaleY; // invert Y-axis with padded maxY
 
+  // ---------------- hover popover ----------------
+  type HoverInfo =
+    | { kind: 'loc'; loc: ReturnType<TravelController['state']['locations']['get']>; x: number; y: number }
+    | { kind: 'route'; route: ReturnType<TravelController['state']['routes']['get']>; x: number; y: number };
+
+  const [hover, setHover] = useState<HoverInfo | null>(null);
+
   return (
     <Paper
       ref={containerRef}
@@ -115,12 +125,28 @@ function MapPanel({ controller, width = 600, height = 400 }: Props) {
           const pathD = locsInRoute
             .map((l, idx) => `${idx === 0 ? 'M' : 'L'} ${mapX(l.x)} ${mapY(l.y)}`)
             .join(' ');
-          return <path key={route.id} d={pathD} fill="none" stroke="#999" strokeWidth={1} />;
+          return (
+            <path
+              key={route.id}
+              d={pathD}
+              fill="none"
+              stroke="#999"
+              strokeWidth={1}
+              style={{ pointerEvents: 'all' }}
+              onMouseEnter={(e) => setHover({ kind: 'route', route, x: e.clientX, y: e.clientY })}
+              onMouseMove={(e) => setHover({ kind: 'route', route, x: e.clientX, y: e.clientY })}
+              onMouseLeave={() => setHover(null)}
+            />
+          );
         })}
 
         {/* Locations */}
         {locs.map((loc) => (
-          <g key={loc.id}>
+          <g key={loc.id}
+            style={{ pointerEvents: 'all' }}
+            onMouseEnter={(e) => setHover({ kind: 'loc', loc, x: e.clientX, y: e.clientY })}
+            onMouseMove={(e) => setHover({ kind: 'loc', loc, x: e.clientX, y: e.clientY })}
+            onMouseLeave={() => setHover(null)}>
             <circle cx={mapX(loc.x)} cy={mapY(loc.y)} r={4} fill="#1976d2" />
             <text x={mapX(loc.x) + 6} y={mapY(loc.y) - 6} fontSize={10} fill="#333">
               {loc.id}
@@ -142,6 +168,49 @@ function MapPanel({ controller, width = 600, height = 400 }: Props) {
           </rect>
         ))}
       </svg>
+
+      {/* Popover */}
+      <Popover
+        open={Boolean(hover)}
+        anchorReference="anchorPosition"
+        anchorPosition={hover ? { top: hover.y, left: hover.x } : undefined}
+        onClose={() => setHover(null)}
+        disableRestoreFocus
+      >
+        {hover && hover.kind === 'loc' && (
+          <Box sx={{ p: 2, maxWidth: 300 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              {hover.loc.name} ({hover.loc.id})
+            </Typography>
+            <Typography variant="body2">
+              Waiting: {hover.loc.waitingPassengers}
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 0.5 }}>
+              Vehicles:
+            </Typography>
+            <Typography variant="caption">
+              {vehicles
+                .filter((v) => v.currentLocation && v.currentLocation.id === hover.loc.id)
+                .map((v) => `${v.id} (${v.getCurrentPassengers()}/${v.capacity})`)
+                .join(', ') || 'None'}
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 0.5 }}>
+              Routes: {routes.filter((r) => r.getLocations().includes(hover.loc)).map((r) => r.id).join(', ') || 'None'}
+            </Typography>
+          </Box>
+        )}
+        {hover && hover.kind === 'route' && (
+          <Box sx={{ p: 2 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              Route {hover.route.id}
+            </Typography>
+            <Typography variant="body2">Type: {hover.route.vehicleType}</Typography>
+            <Typography variant="caption">
+              Stops: {hover.route.getLocations().map((l) => l.name).join(' → ')}
+            </Typography>
+          </Box>
+        )}
+      </Popover>
     </Paper>
   );
 }
