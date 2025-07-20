@@ -23,7 +23,15 @@ function OutputLog({ lines }: Props) {
       <List dense>
         {lines.map((line, idx) => (
           <ListItem key={idx} disableGutters>
-            <ListItemText primaryTypographyProps={{ sx: { fontFamily: 'monospace' } }} primary={line} />
+            <ListItemText
+              primaryTypographyProps={{
+                sx: {
+                  fontFamily: 'monospace',
+                  color: line.startsWith('ERROR:') ? 'error.main' : 'inherit',
+                },
+              }}
+              primary={line}
+            />
           </ListItem>
         ))}
       </List>

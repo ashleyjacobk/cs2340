@@ -3,6 +3,8 @@ import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 import Image from 'mui-image';
 
 // Logo import (relative to project root)
@@ -20,9 +22,14 @@ function App() {
   const controllerRef = useRef(new TravelController());
   const [logLines, setLogLines] = useState<string[]>([]);
   const [, setTick] = useState(0); // force re-render when store changes
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const appendLog = (lines: string[]) => {
     setLogLines((prev) => [...prev, ...lines]);
+    const err = lines.find((l) => l.startsWith('ERROR:'));
+    if (err) {
+      setErrorMsg(err.replace(/^ERROR:\s*/, ''));
+    }
   };
 
   const handleCommand = (cmd: string) => {
@@ -80,6 +87,18 @@ function App() {
       <Typography variant="caption" color="text.secondary">
         React GUI for CS2340 Transit Simulation
       </Typography>
+
+      {/* Error notification */}
+      <Snackbar
+        open={Boolean(errorMsg)}
+        autoHideDuration={6000}
+        onClose={() => setErrorMsg(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <MuiAlert severity="error" onClose={() => setErrorMsg(null)} sx={{ width: '100%' }}>
+          {errorMsg}
+        </MuiAlert>
+      </Snackbar>
     </Container>
   );
 }

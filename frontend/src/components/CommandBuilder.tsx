@@ -400,7 +400,8 @@ function CommandBuilder({ controller, onSubmit }: Props) {
   // ------------------------------ rendering ------------------------------
   return (
     <Box>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start">
+      {/* First row: category, command, raw input, run */}
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
         {/* Category dropdown */}
         <FormControl fullWidth sx={{ minWidth: 160 }}>
           <InputLabel id="cat-select-label">Category</InputLabel>
@@ -435,43 +436,7 @@ function CommandBuilder({ controller, onSubmit }: Props) {
           </Select>
         </FormControl>
 
-        {/* Dynamic parameter inputs */}
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
-          {selectedCmd.params.map((param) => {
-            const val = paramValues[param.name] ?? '';
-            if (param.type === 'select') {
-              const opts = param.options ? param.options(controller) : [];
-              return (
-                <FormControl key={param.name} sx={{ minWidth: 160 }}>
-                  <InputLabel id={`${param.name}-label`}>{param.label}</InputLabel>
-                  <Select
-                    labelId={`${param.name}-label`}
-                    value={val}
-                    label={param.label}
-                    onChange={(e) => handleParamChange(param.name, e.target.value as string)}
-                  >
-                    {opts.map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              );
-            }
-            return (
-              <TextField
-                key={param.name}
-                label={param.label}
-                value={val}
-                type={param.type === 'number' ? 'number' : 'text'}
-                onChange={(e) => handleParamChange(param.name, e.target.value)}
-              />
-            );
-          })}
-        </Stack>
-
-        {/* Optional raw command input */}
+        {/* Raw command */}
         <TextField
           fullWidth
           label="Raw command (optional)"
@@ -480,10 +445,45 @@ function CommandBuilder({ controller, onSubmit }: Props) {
           sx={{ minWidth: 300 }}
         />
 
-        {/* Run button */}
         <Button variant="contained" onClick={handleRun} sx={{ whiteSpace: 'nowrap' }}>
           Run
         </Button>
+      </Stack>
+
+      {/* Second row: parameter inputs */}
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
+        {selectedCmd.params.map((param) => {
+          const val = paramValues[param.name] ?? '';
+          if (param.type === 'select') {
+            const opts = param.options ? param.options(controller) : [];
+            return (
+              <FormControl key={param.name} sx={{ minWidth: 160 }}>
+                <InputLabel id={`${param.name}-label`}>{param.label}</InputLabel>
+                <Select
+                  labelId={`${param.name}-label`}
+                  value={val}
+                  label={param.label}
+                  onChange={(e) => handleParamChange(param.name, e.target.value as string)}
+                >
+                  {opts.map((opt) => (
+                    <MenuItem key={opt} value={opt}>
+                      {opt}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            );
+          }
+          return (
+            <TextField
+              key={param.name}
+              label={param.label}
+              value={val}
+              type={param.type === 'number' ? 'number' : 'text'}
+              onChange={(e) => handleParamChange(param.name, e.target.value)}
+            />
+          );
+        })}
       </Stack>
     </Box>
   );
