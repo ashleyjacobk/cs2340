@@ -1,13 +1,21 @@
-JAVAFX_PATH = /full/path/to/javafx-sdk-21/lib
-JFXMODS = javafx.controls
 
-default:
-	javac -d . --module-path $(JAVAFX_PATH) --add-modules $(JFXMODS) *.java	 **/*.java
-	# On macOS JavaFX must start on the first (AppKit) thread; also fall back to software pipeline if GPU not detected
-	java -XstartOnFirstThread -Dprism.order=sw --module-path $(JAVAFX_PATH) --add-modules $(JFXMODS) Main
+SRC=$(shell find . -name "*.java")
+
+.PHONY: default clean gui
+
+default: cli
+
+cli:
+	@echo "Compiling Java simulation..."
+	javac $(SRC)
+	@echo "Running CLI simulation (type 'help' for commands)"
+	java Main
 
 clean:
-	rm -f *.class
-	rm -f **/*.class
+	find . -name "*.class" -delete
+
+# Existing gui target (React frontend)
+gui:
+	cd frontend && npm install && npm run dev
 	
 	

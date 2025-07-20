@@ -3,14 +3,24 @@
 
 ## Quick Start
 
-1. Install Node ≥ 18.x and npm (or yarn / pnpm).
-2. In the project root, run:
+1. Install **Node.js ≥ 18.x** (includes npm). This is the only dependency you need for the GUI; Java is still required for the CLI.
+
+2. Then run **either** of the following one-liners from the project root:
 
 ```bash
-cd frontend
-npm install      # fetch React + Vite deps
-npm run dev      # opens http://localhost:5173 in your browser
+# Option A: using Make (macOS / Linux / WSL / Git-Bash)
+make gui
+
+# Option B: portable npm script (works on Windows, macOS, Linux)
+npm run gui
 ```
+
+Both commands will:
+• install the React dependencies (first run only)  
+• start the Vite dev-server  
+• open `http://localhost:5173` in your browser
+
+If you prefer the command-line simulation only, simply run `make` (default target) which compiles and launches the Java CLI as before.
 
 The browser UI lets you pick a **command category** (Vehicles, Routes, Locations, Passengers, Time, Hazards) and then a **specific command**. Each parameter appears as its own input/drop-down on the next row. Press **Run** to execute or type any raw CLI command in the optional box.
 

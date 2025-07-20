@@ -439,7 +439,7 @@ function CommandBuilder({ controller, onSubmit }: Props) {
         {/* Raw command */}
         <TextField
           fullWidth
-          label="Raw command (optional)"
+          label="CLI Command (optional)"
           value={rawCmd}
           onChange={(e) => setRawCmd(e.target.value)}
           sx={{ minWidth: 300 }}
