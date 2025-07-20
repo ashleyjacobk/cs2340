@@ -1,4 +1,29 @@
 # cs2340 team 10
+# Running the Transit Simulation GUI (React)
+
+## Quick Start
+
+1. Install Node ≥ 18.x and npm (or yarn / pnpm).
+2. In the project root, run:
+
+```bash
+cd frontend
+npm install      # fetch React + Vite deps
+npm run dev      # opens http://localhost:5173 in your browser
+```
+
+The browser UI lets you pick a **command category** (Vehicles, Routes, Locations, Passengers, Time, Hazards) and then a **specific command**. Each parameter appears as its own input/drop-down on the next row. Press **Run** to execute or type any raw CLI command in the optional box.
+
+Key panels:
+
+* **Output Log** – mirrors the CLI; errors are shown in red and trigger a dismissible alert.
+* **Upcoming Events** – next events in the queue.
+* **Network Map** – shows locations (blue), vehicles (red), routes (grey) with gridlines.
+* **Clock** – current simulation time (minutes) in the header.
+
+All commands listed below work in both the CLI and GUI.
+
+#
 Mahir Riki (mriki3)<br>
 Nithish Sabapathy (nsabapathy6)<br>
 Ashley Jacob (ajacob49)<br>
