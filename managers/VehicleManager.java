@@ -118,7 +118,7 @@ public class VehicleManager {
             throw new IllegalArgumentException("Vehicle type must be U-BAHN, S-BAHN, BUS, or TRAM");
         }
 
-        if (!controller.isIdGloballyUnique(id)) {
+        if (vehicles.containsKey(id) || locations.containsKey(id) || routes.containsKey(id)) {
             throw new IllegalArgumentException("ID " + id + " is not globally unique");
         }
 

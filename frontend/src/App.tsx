@@ -40,6 +40,12 @@ function App() {
         <Typography variant="h4" gutterBottom>
           Transit Simulation GUI
         </Typography>
+
+        <Box sx={{ marginLeft: 'auto' }}>
+          <Typography variant="subtitle1" color="textSecondary">
+            Time: {controllerRef.current.state.time}
+          </Typography>
+        </Box>
       </Box>
 
       <CommandBuilder controller={controllerRef.current} onSubmit={handleCommand} />
