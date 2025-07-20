@@ -399,7 +399,7 @@ function CommandBuilder({ controller, onSubmit }: Props) {
 
   // ------------------------------ rendering ------------------------------
   return (
-    <Box>
+    <Box component="form" onSubmit={(e) => { e.preventDefault(); handleRun(); }}>
       {/* First row: category, command, raw input, run */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
         {/* Category dropdown */}
@@ -442,10 +442,11 @@ function CommandBuilder({ controller, onSubmit }: Props) {
           label="CLI Command (optional)"
           value={rawCmd}
           onChange={(e) => setRawCmd(e.target.value)}
+          // Enter submits because the whole form has onSubmit handler
           sx={{ minWidth: 300 }}
         />
 
-        <Button variant="contained" onClick={handleRun} sx={{ whiteSpace: 'nowrap' }}>
+        <Button variant="contained" type="submit" sx={{ whiteSpace: 'nowrap' }}>
           Run
         </Button>
       </Stack>
