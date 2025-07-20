@@ -62,7 +62,10 @@ export class Location {
   }
 
   setWaitingPassengers(num: number) {
-    this.waitingPassengers = Math.max(0, num);
+    if (num < 0) {
+      throw new Error('Waiting passenger count cannot be negative');
+    }
+    this.waitingPassengers = num;
   }
 
   setPassengerRanges(
