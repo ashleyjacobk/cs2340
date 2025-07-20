@@ -568,7 +568,13 @@ export class TravelController {
       throw new Error(`Invalid or non-unique location id '${id}'.`);
     }
 
-    const loc = new Location(name, id, 0, 0, 0, 0, 0, 0, x, y);
+    const loc = new Location(name, id,
+      0,          // waitingPassengers
+      0, 0,       // debark range
+      0, 0,       // transfer range
+      0, 0,       // board range (low, high)
+      x,
+      y);
     this.state.locations.set(id, loc);
     this.logInfo(`Location created: ${name} at (${x},${y})`);
   }
