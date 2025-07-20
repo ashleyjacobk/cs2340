@@ -4,6 +4,8 @@ import controllers.TravelController;
 import entities.Location;
 import entities.Route;
 import entities.VehicleType;
+import entities.Vehicle;
+import events.DepartureEvent;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,8 +60,18 @@ public class RouteManager {
         Location loc = locations.get(locationId.trim());
         if (route == null) throw new IllegalArgumentException("Route not found");
         if (loc == null) throw new IllegalArgumentException("Location not found");
+        boolean wasEmpty = route.getLocations().isEmpty();
         route.addLocation(loc, position);
         controller.displayMessage("info", "Location " + locationId + " added to route " + routeId + " at position " + position);
+
+        if (wasEmpty) {
+            // for every vehicle assigned to this route, place it at the new stop and schedule departure
+            for (Vehicle v : route.getVehicles()) {
+                v.arriveAt(loc);
+                DepartureEvent de = new DepartureEvent(controller.getTime(), v, controller);
+                controller.addEvent(de);
+            }
+        }
     }
 
     /** Removes a location from a route by position. */
@@ -67,6 +79,13 @@ public class RouteManager {
         Route route = routes.get(routeId.trim());
         if (route == null) throw new IllegalArgumentException("Route not found");
         route.removeLocation(position);
+
+        if (route.getLocations().isEmpty()) {
+            // mark vehicles idle
+            for (Vehicle v : route.getVehicles()) {
+                v.arriveAt(null);
+            }
+        }
         controller.displayMessage("info", "Removed location at position " + position + " from route " + routeId);
     }
 
