@@ -122,9 +122,12 @@ function MapPanel({ controller, width = 600, height = 400 }: Props) {
         {routes.map((route) => {
           const locsInRoute = route.getLocations();
           if (locsInRoute.length < 2) return null;
-          const pathD = locsInRoute
-            .map((l, idx) => `${idx === 0 ? 'M' : 'L'} ${mapX(l.x)} ${mapY(l.y)}`)
-            .join(' ');
+          const pathParts = locsInRoute
+            .map((l, idx) => `${idx === 0 ? 'M' : 'L'} ${mapX(l.x)} ${mapY(l.y)}`);
+          // close loop: add line back to first location
+          const firstLoc = locsInRoute[0];
+          pathParts.push(`L ${mapX(firstLoc.x)} ${mapY(firstLoc.y)}`);
+          const pathD = pathParts.join(' ');
           return (
             <path
               key={route.id}
