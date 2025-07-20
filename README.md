@@ -1,4 +1,39 @@
 # cs2340 team 10
+# Running the Transit Simulation GUI (React)
+
+## Quick Start
+
+1. Install **Node.js ≥ 18.x** (includes npm). This is the only dependency you need for the GUI; Java is still required for the CLI.
+
+2. Then run **either** of the following one-liners from the project root:
+
+```bash
+# Option A: using Make (macOS / Linux / WSL / Git-Bash)
+make gui
+
+# Option B: portable npm script (works on Windows, macOS, Linux)
+npm run gui
+```
+
+Both commands will:
+• install the React dependencies (first run only)  
+• start the Vite dev-server  
+• open `http://localhost:5173` in your browser
+
+If you prefer the command-line simulation only, simply run `make` (default target) which compiles and launches the Java CLI as before.
+
+The browser UI lets you pick a **command category** (Vehicles, Routes, Locations, Passengers, Time, Hazards) and then a **specific command**. Each parameter appears as its own input/drop-down on the next row. Press **Run** to execute or type any raw CLI command in the optional box.
+
+Key panels:
+
+* **Output Log** – mirrors the CLI; errors are shown in red and trigger a dismissible alert.
+* **Upcoming Events** – next events in the queue.
+* **Network Map** – shows locations (blue), vehicles (red), routes (grey) with gridlines.
+* **Clock** – current simulation time (minutes) in the header.
+
+All commands listed below work in both the CLI and GUI.
+
+#
 Mahir Riki (mriki3)<br>
 Nithish Sabapathy (nsabapathy6)<br>
 Ashley Jacob (ajacob49)<br>

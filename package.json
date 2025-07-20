@@ -1,0 +1,7 @@
+{
+  "name": "cs2340-root",
+  "private": true,
+  "scripts": {
+    "gui": "npm install --prefix frontend && npm run dev --prefix frontend"
+  }
+} 

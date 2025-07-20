@@ -1,12 +1,21 @@
-JAVAFX_PATH = lib/javafx21/lib
-JFXMODS = javafx.controls
 
-default:
-	javac -d . --module-path $(JAVAFX_PATH) --add-modules $(JFXMODS) *.java	 **/*.java
-	java --module-path $(JAVAFX_PATH) --add-modules $(JFXMODS) Main
+SRC=$(shell find . -name "*.java")
+
+.PHONY: default clean gui
+
+default: cli
+
+cli:
+	@echo "Compiling Java simulation..."
+	javac $(SRC)
+	@echo "Running CLI simulation (type 'help' for commands)"
+	java Main
 
 clean:
-	rm -f *.class
-	rm -f **/*.class
+	find . -name "*.class" -delete
+
+# Existing gui target (React frontend)
+gui:
+	cd frontend && npm install && npm run dev
 	
 	
