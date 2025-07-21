@@ -15,6 +15,12 @@ export enum HazardType {
   LONG_TERM = 'long_term',
 }
 
+// Matches backend enum for route topology
+export enum RouteShape {
+  RING = 'RING',
+  LINE = 'LINE',
+}
+
 // ---------------------------------------------------------------------------------
 // Domain Models
 // ---------------------------------------------------------------------------------
@@ -68,6 +74,30 @@ export class Location {
     this.waitingPassengers = num;
   }
 
+  private validateRange(low: number, high: number) {
+    if (low < 0 || high < 0 || low > high) {
+      throw new Error(`Invalid range: low=${low} high=${high}`);
+    }
+  }
+
+  setDebarkRange(low: number, high: number) {
+    this.validateRange(low, high);
+    this.debarkLow = low;
+    this.debarkHigh = high;
+  }
+
+  setTransferRange(low: number, high: number) {
+    this.validateRange(low, high);
+    this.transferLow = low;
+    this.transferHigh = high;
+  }
+
+  setBoardRange(low: number, high: number) {
+    this.validateRange(low, high);
+    this.boardLow = low;
+    this.boardHigh = high;
+  }
+
   setPassengerRanges(
     debarkLow: number,
     debarkHigh: number,
@@ -76,12 +106,9 @@ export class Location {
     boardLow: number,
     boardHigh: number,
   ) {
-    this.debarkLow = debarkLow;
-    this.debarkHigh = debarkHigh;
-    this.transferLow = transferLow;
-    this.transferHigh = transferHigh;
-    this.boardLow = boardLow;
-    this.boardHigh = boardHigh;
+    this.setDebarkRange(debarkLow, debarkHigh);
+    this.setTransferRange(transferLow, transferHigh);
+    this.setBoardRange(boardLow, boardHigh);
   }
 }
 
@@ -517,7 +544,7 @@ export class TravelController {
   // ------------------------------- command implementations ---------------
   private cmdCreateVehicle(tokens: string[]) {
     if (tokens.length !== 7) {
-      throw new Error('Usage: create_vehicle,<capacity>,<type>,<id>,<routeId>,<currentLocationId>,<speed>');
+      throw new Error('Usage: create_vehicle,<capacity>,<type>,<id>,<route>,<currentLocation>,<speed>');
     }
     const capacity = Number(tokens[1]);
     const typeStr = tokens[2].toUpperCase().replace('-', '_');
@@ -596,11 +623,12 @@ export class TravelController {
   }
 
   private cmdCreateRoute(tokens: string[]) {
-    if (tokens.length !== 3) {
-      throw new Error('Usage: create_route,<id>,<vehicleType>');
+    if (tokens.length < 3 || tokens.length > 4) {
+      throw new Error('Usage: create_route,<id>,<vehicleType>,[shape ring|line]');
     }
     const id = tokens[1];
     const typeStr = tokens[2].toUpperCase().replace('-', '_');
+    const shape = tokens.length === 4 ? tokens[3].toUpperCase() : 'LINE';
 
     if (!this.validId(id) || !this.isIdGloballyUnique(id)) {
       throw new Error(`Invalid or non-unique route id '${id}'.`);
@@ -850,7 +878,47 @@ export class TravelController {
   }
 
   displayHelp() {
-    this.logInfo('See README for command list');
+    const msg = `Available Commands:
+==== Vehicle Commands ====
+  create_vehicle,<capacity>,<type>,<id>,<route>,<currentLocation>,<speed>
+  display_vehicles
+  set_vehicle_speed,<vehicleId>,<speed_kph>
+  display_vehicle_status,<vehicleId>
+  display_vehicle_riders,<vehicleId>
+  set_vehicle_riders,<vehicleId>,<numRiders>
+==== Location Commands ====
+  create_location,<name>,<id>,<x>,<y>
+  display_locations
+==== Route Commands ====
+  create_route,<id>,<vehicleType>,[shape ring|line]
+  add_location_to_route,<routeId>,<locationId>,<position>
+  remove_location_from_route,<routeId>,<position>
+  display_locations_in_route,<routeId>
+  display_routes
+==== Vehicle Positioning Commands ====
+  set_vehicle_position,<vehicleId>,<routeId>,<position>
+  display_vehicles_at_location,<locationId>
+  display_vehicles_on_route,<routeId>
+==== Time Commands ====
+  display_time
+  advance_time,<time_to_advance>
+  jump_to_time,<new_time>
+  advance_time_to_next_event
+  display_next_event
+==== Hazard Commands ====
+  create_hazard,<description>,<id>,<type(short_term|long_term)>,<impact>,<location1Id>,[<location2Id>]
+  display_hazards
+  display_hazards_at_location,<locationId>
+  remove_hazard,<hazardId>
+==== Passenger Configuration Commands ====
+  set_vehicle_riders,<vehicleId>,<numRiders>
+  set_waiting_passengers,<locationId>,<numWaiting>
+  set_passenger_ranges,<locationId>,<debarkLow>,<debarkHigh>,<transferLow>,<transferHigh>,<boardLow>,<boardHigh>
+==== Exit Command ====
+  exit
+==== Help Command ====
+  help`;
+    msg.split('\n').forEach((l) => this.logInfo(l));
   }
 
   // ------------------------------- UI Helpers ----------------------------
