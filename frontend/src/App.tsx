@@ -45,7 +45,7 @@ function App() {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Box component="img" src={logoImg} sx={{ height: 60 }} />
         <Typography variant="h4" gutterBottom>
-          Transit Simulation GUI
+          Mass Transit Simulation
         </Typography>
 
         <Box sx={{ marginLeft: 'auto' }}>
@@ -85,7 +85,7 @@ function App() {
       <Divider sx={{ my: 4 }} />
 
       <Typography variant="caption" color="text.secondary">
-        React GUI for CS2340 Transit Simulation
+        CS2340 Team 10 Transit Simulation
       </Typography>
 
       {/* Error notification */}
