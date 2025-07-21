@@ -184,8 +184,8 @@ export class Vehicle {
     this.inTransit = true;
   }
 
-  arriveAt(loc: Location) {
-    this.previousLocation = this.currentLocation;
+  arriveAt(loc: Location | null) {
+    this.previousLocation = this.currentLocation ?? loc ?? null;
     this.currentLocation = loc;
     this.inTransit = false;
   }
@@ -652,8 +652,18 @@ export class TravelController {
     if (!route) throw new Error(`Route '${routeId}' not found.`);
     if (!loc) throw new Error(`Location '${locId}' not found.`);
 
+    const wasEmpty = route.getLocations().length === 0;
     route.addLocation(loc, pos);
     this.logInfo(`Location ${loc.name} added to route ${routeId} at position ${pos}`);
+
+    if (wasEmpty) {
+      for (const v of this.state.vehicles.values()) {
+        if (v.route.id === routeId) {
+          v.arriveAt(loc);
+          this.addEvent(new DepartureEvent(this.state.time, v, this));
+        }
+      }
+    }
   }
 
   private cmdRemoveLocationFromRoute(tokens: string[]) {
@@ -664,6 +674,15 @@ export class TravelController {
     if (!route) throw new Error('Route not found');
     const pos = Number(tokens[2]);
     route.removeLocation(pos);
+
+    if (route.getLocations().length === 0) {
+      for (const v of this.state.vehicles.values()) {
+        if (v.route.id === route.id) {
+          v.arriveAt(null);
+        }
+      }
+    }
+
     this.logInfo(`Removed location at position ${pos} from route ${route.id}`);
   }
 
