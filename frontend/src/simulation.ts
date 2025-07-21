@@ -181,6 +181,10 @@ export class Vehicle {
     this.speed = kph;
   }
 
+  getPreviousLocation() {
+    return this.previousLocation;
+  }
+
   toString() {
     const locStr = this.isInTransit()
       ? `in transit towards ${this.currentLocation?.name ?? 'unknown'}`
@@ -649,7 +653,8 @@ export class TravelController {
     const veh = this.state.vehicles.get(tokens[1]);
     if (!veh) throw new Error('Vehicle not found');
     if (veh.isInTransit()) {
-      this.logInfo(`Vehicle ${veh.id} is in transit.`);
+      const from = veh.getPreviousLocation()?.name ?? 'unknown';
+      this.logInfo(`Vehicle ${veh.id} departed from ${from} and is in transit.`);
     } else {
       this.logInfo(`Vehicle ${veh.id} is at location ${veh.currentLocation.name}.`);
     }

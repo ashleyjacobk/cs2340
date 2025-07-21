@@ -108,8 +108,15 @@ public class CommandInterpreter {
         commandMap.put("display_locations", tokens -> controller.getLocationManager().displayLocations());
 
         commandMap.put("create_route", tokens -> {
-            if (tokens.length != 3) throw new IllegalArgumentException("Usage: create_route,<id>,<vehicleType>");
-            controller.getRouteManager().createRoute(tokens[1], tokens[2]);
+            if (tokens.length == 3) {
+                controller.getRouteManager().createRoute(tokens[1], tokens[2]);
+            } else if (tokens.length == 4) {
+                String shapeStr = tokens[3].trim();
+                RouteShape shape = "LINE".equalsIgnoreCase(shapeStr) ? RouteShape.LINE : RouteShape.RING;
+                controller.getRouteManager().createRoute(tokens[1], tokens[2], shape);
+            } else {
+                throw new IllegalArgumentException("Usage: create_route,<id>,<vehicleType>[,<shape>]");
+            }
         });
 
         commandMap.put("add_location_to_route", tokens -> {
