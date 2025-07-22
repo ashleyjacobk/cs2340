@@ -392,6 +392,27 @@ function CommandBuilder({ controller, onSubmit }: Props) {
       setRawCmd('');
       return;
     }
+    // Special handling for create_hazard command
+    if (selectedKey === 'create_hazard') {
+      // Check if hazard ID already exists
+      const hazardId = (paramValues['id'] ?? '').trim();
+      if (controller.state.hazards.some(h => h.id === hazardId)) {
+        alert('A hazard with this ID already exists');
+        return;
+      }
+
+      const params = selectedCmd.params.map(p => {
+        const value = (paramValues[p.name] ?? '').trim();
+        // Skip location2Id if it's empty
+        if (p.name === 'location2Id' && !value) {
+          return null;
+        }
+        return value;
+      }).filter(v => v !== null);
+      const cmdLine = [selectedKey, ...params].join(',');
+      onSubmit(cmdLine);
+      return;
+    }
     const parts = [selectedKey, ...selectedCmd.params.map((p) => (paramValues[p.name] ?? '').trim())];
     const cmdLine = parts.join(',');
     onSubmit(cmdLine);

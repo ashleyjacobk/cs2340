@@ -334,7 +334,7 @@ class DepartureEvent implements SimEvent {
 
     const dist = currentLocation.distanceTo(nextLocation);
     const minutes = this.ctrl.computeTravelMinutes(dist, this.vehicle.speed, currentLocation, nextLocation);
-    const arrivalTime = this.time + minutes;
+    const arrivalTime = Math.round(this.time + minutes);
     this.ctrl.addEvent(new ArrivalEvent(arrivalTime, this.vehicle, currentLocation, nextLocation, this.ctrl));
   }
 
@@ -386,7 +386,7 @@ class ArrivalEvent implements SimEvent {
       }
     }
 
-    const departureTime = this.time + exchangeTime;
+    const departureTime = Math.round(this.time + exchangeTime);
     this.ctrl.addEvent(new DepartureEvent(departureTime, this.vehicle, this.ctrl));
     this.ctrl.logInfo(`Vehicle ${this.vehicle.id} arrived at ${loc.name}. Departure at ${departureTime}.`);
   }

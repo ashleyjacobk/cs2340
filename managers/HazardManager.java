@@ -28,16 +28,47 @@ public class HazardManager {
         this.controller = controller;
     }
 
-    public void createHazard(String description, String id, HazardType type, double impact, String loc1Id, String loc2Id) {
-        Location loc1 = locations.get(loc1Id.trim());
-        Location loc2 = (loc2Id == null || loc2Id.isEmpty()) ? null : locations.get(loc2Id.trim());
-        if (loc1 == null) throw new IllegalArgumentException("Location1 not found");
-        if (loc2Id != null && !loc2Id.isEmpty() && loc2 == null) throw new IllegalArgumentException("Location2 not found");
+    public void createHazard(String description, String id, HazardType type, double impact, Location loc1) {
+        if (!isIdGloballyUnique(id)) throw new IllegalArgumentException("Hazard id must be unique");
+        Hazard hazard = new Hazard(description, id, type, impact, loc1);
+        hazards.add(hazard);
+        controller.displayMessage("info", "Hazard created: " + hazard.toString());
+        handleShortTermHazard(hazard, type, impact);
+    }
+
+    public void createHazard(String description, String id, HazardType type, double impact, Location loc1, Location loc2) {
         if (!isIdGloballyUnique(id)) throw new IllegalArgumentException("Hazard id must be unique");
         Hazard hazard = new Hazard(description, id, type, impact, loc1, loc2);
         hazards.add(hazard);
         controller.displayMessage("info", "Hazard created: " + hazard.toString());
+        handleShortTermHazard(hazard, type, impact);
+    }
 
+    public void createHazard(String description, String id, HazardType type, double impact, String loc1Id, String loc2Id) {
+        // Validate first location
+        if (loc1Id == null || loc1Id.trim().isEmpty()) {
+            throw new IllegalArgumentException("Location1 is required");
+        }
+        Location loc1 = locations.get(loc1Id.trim());
+        if (loc1 == null) {
+            throw new IllegalArgumentException("Location1 not found: " + loc1Id);
+        }
+        
+        // Handle single-location hazard case
+        if (loc2Id == null || loc2Id.trim().isEmpty() || loc2Id.equals("null")) {
+            createHazard(description, id, type, impact, loc1);
+            return;
+        }
+        
+        // Handle two-location hazard case
+        Location loc2 = locations.get(loc2Id.trim());
+        if (loc2 == null) {
+            throw new IllegalArgumentException("Location2 not found: " + loc2Id);
+        }
+        createHazard(description, id, type, impact, loc1, loc2);
+    }
+
+    private void handleShortTermHazard(Hazard hazard, HazardType type, double impact) {
         // If short term, reschedule immediate departures
         if (type == HazardType.SHORT_TERM) {
             List<Event> toAdd = new ArrayList<>();
